@@ -38,7 +38,6 @@ public class MySQLDAO extends AbstractDAO {
 
     /**
      * 获取数据库中的表信息
-     * @return
      * @throws SQLException
      */
     @Override

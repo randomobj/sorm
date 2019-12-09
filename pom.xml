@@ -5,7 +5,7 @@
 
     <groupId>com.gitee.randomobject</groupId>
     <artifactId>sorm</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
 
     <url>https://github.com/randomobj/sorm</url>
     <name>SORM</name>
@@ -55,6 +55,7 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.48</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
