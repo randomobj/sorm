@@ -462,20 +462,8 @@ public class ReflectionUtil {
                     result = false;
                 }
             }
-            //根据包名过滤
-            if (SormConfig.ignorePackageNameList != null) {
-                for (String ignorePackageName : SormConfig.ignorePackageNameList) {
-                    if (_class.getName().contains(ignorePackageName)) {
-                        logger.warn("[忽略包名]包名:{}类名:{}", ignorePackageName, _class.getName());
-                        result = false;
-                    }
-                }
-            }
             return result;
         });
-        if (SormConfig.predicate != null) {
-            stream.filter(SormConfig.predicate);
-        }
         classList = stream.collect(Collectors.toList());
         return classList;
     }

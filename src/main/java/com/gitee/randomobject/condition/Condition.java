@@ -157,22 +157,22 @@ public interface Condition<T> {
     Condition addUpdate(String field, Object value);
 
     /**
-     * <p>添加聚合字段,默认别名为<b>{@link Condition#getAggerateList()}</b></p>
+     * <p>添加聚合字段,默认别名为<b>{@link Condition#getTogetherList()}</b></p>
      * <p>用于<b>getAggerateList()</b>方法</p>
      *
-     * @param aggerate COUNT,SUM,MAX,MIN,AVG
+     * @param together COUNT,SUM,MAX,MIN,AVG
      * @param field    字段名
      */
-    Condition addAggerate(String aggerate, String field);
+    Condition addTogether(String together, String field);
 
     /**
      * 添加聚合字段
      *
-     * @param aggerate COUNT,SUM,MAX,MIN,AVG
+     * @param together COUNT,SUM,MAX,MIN,AVG
      * @param field    字段名
      * @param alias    聚合字段别名
      */
-    Condition addAggerate(String aggerate, String field, String alias);
+    Condition addTogether(String together, String field, String alias);
 
     /**
      * 添加分组查询
@@ -283,10 +283,10 @@ public interface Condition<T> {
 
     /**
      * <p>返回聚合字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用{@link Condition#addAggerate(String, String)}</p>
+     * <p><b>前置条件</b>:请先调用{@link Condition#addTogether(String, String)}</p>
      * <p>若调用了{@link Condition#addColumn(String)} 则会返回addColumn所指定的字段</p>
      */
-    JSONArray getAggerateList();
+    JSONArray getTogetherList();
 
     /**
      * <p>返回指定的部分字段的数据库记录</p>

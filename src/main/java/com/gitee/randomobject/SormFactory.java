@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 
 public class SormFactory {
     Logger logger = LoggerFactory.getLogger(SormFactory.class);
-    private static HashMap<String, Class> driverMapping = new HashMap();
+    private final static HashMap<String, Class> driverMapping = new HashMap();
 
     //目前只支持mysql
     static {
@@ -44,24 +44,12 @@ public class SormFactory {
         return this;
     }
 
-    public SormFactory ignorePackageName(String ignorePackageName) {
-        if (SormConfig.ignorePackageNameList == null) {
-            SormConfig.ignorePackageNameList = new ArrayList<>();
-        }
-        SormConfig.ignorePackageNameList.add(ignorePackageName);
-        return this;
-    }
 
     public SormFactory ignoreClass(Class _class) {
         if (SormConfig.ignoreClassList == null) {
             SormConfig.ignoreClassList = new ArrayList<>();
         }
         SormConfig.ignoreClassList.add(_class);
-        return this;
-    }
-
-    public SormFactory filter(Predicate<Class> predicate) {
-        SormConfig.predicate = predicate;
         return this;
     }
 

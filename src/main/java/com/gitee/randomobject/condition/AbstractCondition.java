@@ -28,15 +28,15 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     private Logger logger = LoggerFactory.getLogger(AbstractCondition.class);
 
-    public static String[] patterns = new String[]{"%", "_", "[", "[^", "[!", "]"};
+    public final static String[] patterns = new String[]{"%", "_", "[", "[^", "[!", "]"};
 
     /**
      * 构建sql语句
      */
-    protected StringBuilder sqlBuilder = new StringBuilder();
+    protected final StringBuilder sqlBuilder = new StringBuilder();
 
     /**
-     * 用于记录sql日志
+     * 记录sql日志
      */
     protected String sql;
 
@@ -344,16 +344,16 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addAggerate(String aggerate, String field) {
+    public Condition addTogether(String together, String field) {
         field = StringUtil.Camel2Underline(field);
-        query.aggregateColumnBuilder.append(aggerate + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, aggerate + "(" + field + ")") + ",");
+        query.aggregateColumnBuilder.append(together + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, together + "(" + field + ")") + ",");
         return this;
     }
 
     @Override
-    public Condition addAggerate(String aggerate, String field, String alias) {
+    public Condition addTogether(String together, String field, String alias) {
         field = StringUtil.Camel2Underline(field);
-        query.aggregateColumnBuilder.append(aggerate + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, alias) + ",");
+        query.aggregateColumnBuilder.append(together + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, alias) + ",");
         return this;
     }
 
@@ -606,7 +606,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public JSONArray getAggerateList() {
+    public JSONArray getTogetherList() {
         assureDone();
         sqlBuilder.setLength(0);
         sqlBuilder.append("select " + query.distinct + " ");

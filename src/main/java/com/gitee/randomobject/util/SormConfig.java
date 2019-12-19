@@ -21,14 +21,6 @@ public class SormConfig {
      */
     public static List<Class> ignoreClassList;
     /**
-     * 要忽略的包名
-     */
-    public static List<String> ignorePackageNameList;
-    /**
-     * 函数式接口过滤类
-     */
-    public static Predicate<Class> predicate;
-    /**
      * 是否开启外键约束
      */
     public static boolean openForeignKey;
