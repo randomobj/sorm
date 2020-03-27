@@ -15,11 +15,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
@@ -260,8 +258,10 @@ public class ReflectionUtil {
                 if (o == null) {
                     ps.setObject(parameterIndex, null);
                 } else {
-                    java.sql.Date sqlDate = new java.sql.Date(((Date) o).getTime());
-                    ps.setDate(parameterIndex, sqlDate);
+                    Timestamp timestamp = new Timestamp(((Date)o).getTime());
+//                    java.sql.Date sqlDate = new java.sql.Date(((Date) o).getTime());
+//                    ps.setDate(parameterIndex, sqlDate);
+                    ps.setTimestamp(3,timestamp);
                 }
                 return "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }
