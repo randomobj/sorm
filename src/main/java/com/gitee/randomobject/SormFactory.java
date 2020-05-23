@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import javax.xml.soap.SAAJResult;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +26,24 @@ public class SormFactory {
         driverMapping.put("jdbc:mysql", MySQLDAO.class);
     }
 
+    private SormFactory() {
+    }
+
+    private enum SormFactoryBuilder {
+        INSTANCE;
+        private SormFactory sormFactory;
+
+        SormFactoryBuilder() {
+            this.sormFactory = new SormFactory();
+        }
+
+        public SormFactory getSormFactory(){
+            return sormFactory;
+        }
+    }
+
     public static SormFactory newInstance() {
-        return new SormFactory();
+        return  SormFactoryBuilder.INSTANCE.getSormFactory();
     }
 
     public SormFactory dataSource(DataSource dataSource) {
@@ -95,4 +112,5 @@ public class SormFactory {
         }
         return dao;
     }
+
 }

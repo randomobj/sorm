@@ -19,28 +19,24 @@ public interface Condition<T> {
 
     /**
      * 添加空查询
-     *
      * @param field 指明哪个字段为Null
      */
     Condition addNullQuery(String field);
 
     /**
      * 添加非空查询
-     *
      * @param field 指明哪个字段不为Null
      */
     Condition addNotNullQuery(String field);
 
     /**
      * 添加非空查询
-     *
      * @param field 指明哪个字段不为空字符串
      */
     Condition addNotEmptyQuery(String field);
 
     /**
      * 添加范围查询语句
-     *
      * @param field  字段
      * @param values 指明在该范围内的值
      */
@@ -48,15 +44,13 @@ public interface Condition<T> {
 
     /**
      * 添加范围查询语句
-     *
      * @param field  字段
      * @param values 指明在该范围内的值
      */
-    Condition addInQuery(String field, List values);
+    Condition addInQuery(String field, List<? extends Object> values);
 
     /**
      * 添加范围查询语句
-     *
      * @param field  字段
      * @param values 指明在不该范围内的值
      */
@@ -64,11 +58,10 @@ public interface Condition<T> {
 
     /**
      * 添加范围查询语句
-     *
      * @param field  字段
      * @param values 指明在不该范围内的值
      */
-    Condition addNotInQuery(String field, List values);
+    Condition addNotInQuery(String field, List<? extends Object> values);
 
     /**
      * 添加between语句

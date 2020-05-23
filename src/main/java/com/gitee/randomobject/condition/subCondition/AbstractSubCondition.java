@@ -49,8 +49,8 @@ public class AbstractSubCondition<T> implements SubCondition<T>, Serializable {
     }
 
     @Override
-    public <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField, String compositField) {
-        AbstractSubCondition abstractSubCondition = (AbstractSubCondition) subQuery.condition.joinTable(_class, primaryField, joinTableField, compositField);
+    public <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField, String compositeField) {
+        AbstractSubCondition abstractSubCondition = (AbstractSubCondition) subQuery.condition.joinTable(_class, primaryField, joinTableField, compositeField);
         abstractSubCondition.subQuery.parentSubQuery = this.subQuery;
         abstractSubCondition.subQuery.parentSubCondition = this;
         return abstractSubCondition;

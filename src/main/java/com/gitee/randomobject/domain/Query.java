@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 查询类
+ * 查询类辅助类
  */
 public final class Query implements Serializable {
 

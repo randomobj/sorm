@@ -13,8 +13,10 @@ import com.gitee.randomobject.util.SormConfig;
 import com.gitee.randomobject.util.ValidateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.java2d.opengl.OGLContext;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
@@ -82,17 +84,12 @@ public abstract class AbstractDAO implements DAO {
     @Override
     public <T> T fetch(Class<T> _class, long id) {
         String property = ReflectionUtil.entityMap.get(_class.getName()).id.name;
-        return fetch(_class, property, id);
-    }
-
-    @Override
-    public <T> T fetch(Class<T> _class, String property, Object value) {
-        List<T> instanceList = fetchList(_class, property, value);
-        if (ValidateUtil.isNotEmpty(instanceList)) {
-            return instanceList.get(0);
-        } else {
+        List<T> ts = fetchList(_class, property, id);
+        if (null == ts){
+            logger.debug("[不存在此id的数据记录]id:{}",id);
             return null;
         }
+        return ts.get(0);
     }
 
     @Override
@@ -168,38 +165,26 @@ public abstract class AbstractDAO implements DAO {
             Class _class = instance.getClass();
             PreparedStatement ps = null;
             long effect = 0;
-
+            //拿到实体类信息
             Entity entity = ReflectionUtil.entityMap.get(_class.getName());
-
-            if (exist(instance)) {
-                if (entity.uniqueKeyProperties != null && entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
-                    //根据唯一性约束更新
-                    String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
-                    ps = connection.prepareStatement(updateByUniqueKey);
-                    //设置需要插入的实体类的值
-                    final String info = ReflectionUtil.setValueWithUpdateByUniqueKey(ps, instance, updateByUniqueKey);
-                    logger.debug("[根据唯一性约束更新]执行SQL:{}", info);
-                    effect = ps.executeUpdate();
-
-                    //获取id并设置
-                    if(startTranscation){
-                        //TODO SQL Server 开启事务时该方法以下代码会导致阻塞,原因不明
-                    }else{
-                        Condition condition = getUniqueCondition(instance);
-                        List<Long> ids = condition.getValueList(Long.class, entity.id.name);
-                        if (ids.size() > 0) {
-                            entity.id.field.setLong(instance, ids.get(0));
-                        }
-                    }
-                } else if (ReflectionUtil.hasId(instance)) {
-                    //根据id更新
-                    String updateById = sqlHelper.updateById(_class);
-                    ps = connection.prepareStatement(updateById);
-                    logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(ps, instance, updateById));
-                    effect = ps.executeUpdate();
+            if (exist(instance)) { //如果返回true，那么一定是存在id
+                Condition condition = getUniqueCondition(instance);
+                List<Long> ids = condition.getValueList(Long.class, entity.id.name);
+                if (ids.size() > 0) {
+                    entity.id.field.setLong(instance, ids.get(0));
                 }
+                //根据id更新
+                String updateById = sqlHelper.updateById(_class);
+                ps = connection.prepareStatement(updateById);
+                logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(ps, instance, updateById));
+                effect = ps.executeUpdate();
             } else {
-                //执行insertIgnore
+                Condition condition = getUniqueCondition(instance);
+                if (condition.count()>0){//存在唯一性约束，
+                    logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
+                    return effect;
+                }
+                //插入
                 String insertIgnore = sqlHelper.insertIgnore(_class, syntaxHandler.getSyntax(Syntax.InsertIgnore));
                 ps = connection.prepareStatement(insertIgnore, PreparedStatement.RETURN_GENERATED_KEYS);
                 logger.debug("[执行插入操作]执行SQL:{}", ReflectionUtil.setValueWithInsertIgnore(ps, instance, insertIgnore));
@@ -207,7 +192,6 @@ public abstract class AbstractDAO implements DAO {
                 if (effect > 0) {
                     //获取主键
                     ResultSet rs = ps.getGeneratedKeys();
-
                     if (rs.next()) {
                         //默认获取的主键类型是long
                         long id = rs.getLong(1);
@@ -239,19 +223,6 @@ public abstract class AbstractDAO implements DAO {
         try {
             Connection connection = getConnection();
             connection.setAutoCommit(false);
-
-            Class _class = instanceList.get(0).getClass();
-            Entity entity = ReflectionUtil.entityMap.get(_class.getName());
-
-            String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
-            PreparedStatement _updateByUniqueKeyPs = null;
-            if (entity.uniqueKeyProperties != null && entity.uniqueKeyProperties.length + 1 != entity.properties.length) {
-                //如果有则获取对应语句
-                logger.debug("[根据唯一性约束更新]SQL语句:{}", updateByUniqueKey);
-                _updateByUniqueKeyPs = connection.prepareStatement(updateByUniqueKey);
-            }
-            PreparedStatement updateByUniqueKeyPs = _updateByUniqueKeyPs;
-
             String updateById = sqlHelper.updateById(instanceList.get(0).getClass());
             PreparedStatement updateByIdPs = connection.prepareStatement(updateById);
             String insertIgnore = sqlHelper.insertIgnore(instanceList.get(0).getClass(), syntaxHandler.getSyntax(Syntax.InsertIgnore));
@@ -260,15 +231,9 @@ public abstract class AbstractDAO implements DAO {
             for (Object instance : instanceList) {
                 try {
                     if (exist(instance)) {
-                        if (_updateByUniqueKeyPs != null) {
-                            //如果有唯一性约束则以唯一性约束更新
-                            logger.debug("[根据唯一性约束更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateByUniqueKey(updateByUniqueKeyPs, instance, updateByUniqueKey));
-                            updateByUniqueKeyPs.addBatch();
-                        } else if (ReflectionUtil.hasId(instance)) {
-                            //根据id更新
-                            logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(updateByIdPs, instance, updateById));
-                            updateByIdPs.addBatch();
-                        }
+                        //根据id更新
+                        logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(updateByIdPs, instance, updateById));
+                        updateByIdPs.addBatch();
                     } else {
                         //执行insertIgnore
                         logger.debug("[执行插入操作]执行SQL:{}", ReflectionUtil.setValueWithInsertIgnore(insertIgnorePs, instance, insertIgnore));
@@ -281,7 +246,7 @@ public abstract class AbstractDAO implements DAO {
             }
             //执行Batch并将所有结果添加
             long effect = 0;
-            PreparedStatement[] preparedStatements = {updateByUniqueKeyPs, updateByIdPs, insertIgnorePs};
+            PreparedStatement[] preparedStatements = {updateByIdPs, insertIgnorePs};
             for (int i = 0; i < preparedStatements.length; i++) {
                 if (preparedStatements[i] == null) {
                     continue;
@@ -375,22 +340,6 @@ public abstract class AbstractDAO implements DAO {
     }
 
     /**
-     * 设置保存点
-     */
-    @Override
-    public Savepoint setSavePoint(String name) {
-        if (connection == null) {
-            return null;
-        }
-        try {
-            return connection.setSavepoint(name);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
      * 事务回滚
      */
     @Override
@@ -466,7 +415,7 @@ public abstract class AbstractDAO implements DAO {
             createTable(entity);
             createIndex(entity);
             createUniqueKey(entity);
-            if(SormConfig.openForeignKey){
+            if (SormConfig.openForeignKey) {
                 createForeignKey();
             }
             commit();
@@ -511,7 +460,7 @@ public abstract class AbstractDAO implements DAO {
      * 仅供Condition类调用
      */
     public Connection getConnection() throws SQLException {
-        //开启事务时使用同一Connection,不开启事务时从线程池中获取
+        //开启事务时使用同一Connection,不开启事务时从连接池中获取
         if (startTranscation) {
             synchronized (this) {
                 if (connection == null) {
@@ -553,17 +502,17 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 创建索引
      */
-    protected void createIndex(Entity entity) throws SQLException{
+    protected void createIndex(Entity entity) throws SQLException {
         if (null == entity.indexProperties || entity.indexProperties.length == 0) {
             return;
         }
         String indexName = entity.tableName + "_index";
-        if (isIndexExists(entity.tableName,indexName)) {
+        if (isIndexExists(entity.tableName, indexName)) {
             return;
         }
-        StringBuilder indexBuilder = new StringBuilder("create index " + syntaxHandler.getSyntax(Syntax.Escape,indexName)+" on " + syntaxHandler.getSyntax(Syntax.Escape,entity.tableName) + " (");
+        StringBuilder indexBuilder = new StringBuilder("create index " + syntaxHandler.getSyntax(Syntax.Escape, indexName) + " on " + syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " (");
         for (Property property : entity.indexProperties) {
-            indexBuilder.append(syntaxHandler.getSyntax(Syntax.Escape,property.column)+",");
+            indexBuilder.append(syntaxHandler.getSyntax(Syntax.Escape, property.column) + ",");
         }
         indexBuilder.deleteCharAt(indexBuilder.length() - 1);
         indexBuilder.append(");");
@@ -575,17 +524,17 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 创建唯一索引
      */
-    protected void createUniqueKey(Entity entity) throws SQLException{
+    protected void createUniqueKey(Entity entity) throws SQLException {
         if (null == entity.uniqueKeyProperties || entity.uniqueKeyProperties.length == 0) {
             return;
         }
         String uniqueKeyIndexName = entity.tableName + "_unique_index";
-        if (isIndexExists(entity.tableName,uniqueKeyIndexName)) {
+        if (isIndexExists(entity.tableName, uniqueKeyIndexName)) {
             return;
         }
-        StringBuilder uniqueKeyBuilder = new StringBuilder("create unique index " + syntaxHandler.getSyntax(Syntax.Escape,uniqueKeyIndexName)+" on " + syntaxHandler.getSyntax(Syntax.Escape,entity.tableName) + " (");
+        StringBuilder uniqueKeyBuilder = new StringBuilder("create unique index " + syntaxHandler.getSyntax(Syntax.Escape, uniqueKeyIndexName) + " on " + syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " (");
         for (Property property : entity.uniqueKeyProperties) {
-            uniqueKeyBuilder.append(syntaxHandler.getSyntax(Syntax.Escape,property.column) + ",");
+            uniqueKeyBuilder.append(syntaxHandler.getSyntax(Syntax.Escape, property.column) + ",");
         }
         uniqueKeyBuilder.deleteCharAt(uniqueKeyBuilder.length() - 1);
         uniqueKeyBuilder.append(");");
@@ -602,19 +551,21 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 索引是否存在
      */
-    protected abstract boolean isIndexExists(String tableName,String indexName) throws SQLException;
+    protected abstract boolean isIndexExists(String tableName, String indexName) throws SQLException;
 
     /**
      * 外键是否存在
      */
-    protected abstract boolean isConstraintExists(String tableName,String constraintName) throws SQLException;
+    protected abstract boolean isConstraintExists(String tableName, String constraintName) throws SQLException;
 
     /**
      * 删除索引
      */
-    protected abstract void dropIndex(String tableName,String indexName) throws SQLException;
+    protected abstract void dropIndex(String tableName, String indexName) throws SQLException;
 
-    /**自动创建表*/
+    /**
+     * 自动创建表
+     */
     public void autoBuildDatabase() throws SQLException {
         if (!SormConfig.autoCreateTable) {
             return;
@@ -653,7 +604,7 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 对比实体类和数据表并创建新列
      */
-    private void compareEntityDatabase(Entity entity, Entity dbEntity) throws SQLException{
+    private void compareEntityDatabase(Entity entity, Entity dbEntity) throws SQLException {
         Property[] entityProperties = entity.properties;
         Property[] dbEntityProperties = dbEntity.properties;
         boolean hasIndexProperty = false;
@@ -668,29 +619,29 @@ public abstract class AbstractDAO implements DAO {
                 }
             }
             if (!columnExist) {
-                addProperty(entity,entityProperty);
-                if(entityProperty.index){
+                addProperty(entity, entityProperty);
+                if (entityProperty.index) {
                     hasIndexProperty = true;
                 }
-                if(entityProperty.unique){
+                if (entityProperty.unique) {
                     hasUniqueProperty = true;
                 }
-                if(null!=entityProperty.foreignKey){
+                if (null != entityProperty.foreignKey) {
                     hasForeignKeyProperty = true;
                 }
             }
         }
         //如果新增属性中有索引属性,则重新建立联合索引
         if (hasIndexProperty) {
-            dropIndex(entity.tableName,entity.tableName + "_index");
+            dropIndex(entity.tableName, entity.tableName + "_index");
             createIndex(entity);
         }
         //如果新增属性中有唯一约束,则重新建立联合唯一约束
         if (hasUniqueProperty) {
-            dropIndex(entity.tableName,entity.tableName + "_unique_index");
+            dropIndex(entity.tableName, entity.tableName + "_unique_index");
             createUniqueKey(entity);
         }
-        if(hasForeignKeyProperty){
+        if (hasForeignKeyProperty) {
             createForeignKey();
         }
     }
@@ -698,9 +649,9 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 表添加属性
      */
-    private void addProperty(Entity entity, Property property) throws SQLException{
+    private void addProperty(Entity entity, Property property) throws SQLException {
         StringBuilder addColumnBuilder = new StringBuilder();
-        addColumnBuilder.append("alter table " + syntaxHandler.getSyntax(Syntax.Escape,entity.tableName) + " add " + syntaxHandler.getSyntax(Syntax.Escape,property.column) + " " + property.columnType + " ");
+        addColumnBuilder.append("alter table " + syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " add " + syntaxHandler.getSyntax(Syntax.Escape, property.column) + " " + property.columnType + " ");
         if (null != property.defaultValue) {
             addColumnBuilder.append(" default " + property.defaultValue);
         }
@@ -713,8 +664,10 @@ public abstract class AbstractDAO implements DAO {
         connection.prepareStatement(sql).executeUpdate();
     }
 
-    /**更新属性列类型*/
-    private void updateColumnType(){
+    /**
+     * 更新属性列类型
+     */
+    private void updateColumnType() {
         Collection<Entity> entityList = ReflectionUtil.entityMap.values();
         for (Entity entity : entityList) {
             Property[] properties = entity.properties;

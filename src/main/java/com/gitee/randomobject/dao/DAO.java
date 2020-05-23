@@ -22,18 +22,9 @@ public interface DAO {
     /**
      * <p>根据id查询</p>
      * @param _class 类名
-     * @param id     指定要查询id字段的值
+     * @param id 指定要查询id字段的值
      */
     <T> T fetch(Class<T> _class, long id);
-
-    /**
-     * <p>根据属性查询单个记录</p>
-     * <p>若符合条件的记录有多条,则只会返回第一条记录</p>
-     * @param _class   类名
-     * @param property 指定要查询的字段
-     * @param value    指定要查询的字段的值
-     */
-    <T> T fetch(Class<T> _class, String property, Object value);
 
     /**
      * <p>根据属性查询记录</p>
@@ -59,7 +50,7 @@ public interface DAO {
 
     /**
      * <p>保存对象数组</p>
-     * <p>判断该实例是否有id,无id则直接插入;然后判断该实例是否有唯一性约束,若有则根据唯一性约束更新,否则根据id更新</p>
+     * <p>判断该实例是否有id,无id则直接插入,有id则根据id更新</p>
      *
      * @param instances 要保存的实例
      */
@@ -67,7 +58,7 @@ public interface DAO {
 
     /**
      * <p>保存对象数组</p>
-     * <p>判断该实例是否有id,无id则直接插入;然后判断该实例是否有唯一性约束,若有则根据唯一性约束更新,否则根据id更新</p>
+     * <p>判断该实例是否有id,无id则直接插入,有id则根据id更新</p>
      *
      * @param instanceList 要保存的实例
      */
@@ -101,11 +92,6 @@ public interface DAO {
      * 开启事务
      */
     void startTransaction();
-
-    /**
-     * 设置保存点
-     */
-    Savepoint setSavePoint(String name);
 
     /**
      * 事务回滚

@@ -125,6 +125,7 @@ public class ReflectionUtil {
         Property id = null;
         StringBuilder sqlBuilder = new StringBuilder(sql.replace("?", placeHolder));
         for (Property property : properties) {
+            //设置除id以外的字段的值
             if (property.id) {
                 id = property;
                 continue;
@@ -142,6 +143,7 @@ public class ReflectionUtil {
         if (indexOf >= 0) {
             sqlBuilder.replace(indexOf, indexOf + placeHolder.length(), parameter);
         }
+        logger.info("[根据id更新实体类sql语句]sql:{}",sqlBuilder.toString());
         return sqlBuilder.toString();
     }
 
@@ -258,10 +260,10 @@ public class ReflectionUtil {
                 if (o == null) {
                     ps.setObject(parameterIndex, null);
                 } else {
-                    Timestamp timestamp = new Timestamp(((Date)o).getTime());
-//                    java.sql.Date sqlDate = new java.sql.Date(((Date) o).getTime());
-//                    ps.setDate(parameterIndex, sqlDate);
-                    ps.setTimestamp(3,timestamp);
+//                    Timestamp timestamp = new Timestamp(((Date)o).getTime());
+//                    ps.setTimestamp(3,timestamp);
+                    java.sql.Date sqlDate = new java.sql.Date(((Date) o).getTime());
+                    ps.setDate(parameterIndex, sqlDate);
                 }
                 return "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }

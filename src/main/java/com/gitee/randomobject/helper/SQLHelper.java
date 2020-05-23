@@ -164,7 +164,7 @@ public class SQLHelper implements Serializable {
         if (!sqlCache.containsKey(key)) {
             StringBuilder builder = new StringBuilder();
             builder.append("drop table");
-            builder.append(" "+syntaxHandler.getSyntax(Syntax.Escape, ReflectionUtil.entityMap.get(_class.getName()).tableName));
+            builder.append(" " + syntaxHandler.getSyntax(Syntax.Escape, ReflectionUtil.entityMap.get(_class.getName()).tableName));
             sqlCache.put(key, builder.toString());
         }
         return sqlCache.get(key);
@@ -188,17 +188,18 @@ public class SQLHelper implements Serializable {
     }
 
     /**
-     *  清空表
+     * 清空表
+     *
      * @param aClass 被清空表对应的实体类
      * @return 生成清空表的SQL语句
      */
     public String clear(Class aClass) {
         //先判断是否存在需要清除的表的SQL
-        String key = "cleanTable_"+aClass.getName();
-        if (!sqlCache.containsKey(key)){
+        String key = "cleanTable_" + aClass.getName();
+        if (!sqlCache.containsKey(key)) {
             //通过反射工具类，拿到保存的实体类信息，进而拿到数据库中的表名
             String tableName = ReflectionUtil.entityMap.get(aClass.getName()).tableName;
-            String cleanSql = "truncate "+syntaxHandler.getSyntax(Syntax.Escape,tableName);
+            String cleanSql = "truncate " + syntaxHandler.getSyntax(Syntax.Escape, tableName);
             sqlCache.put(key, cleanSql);
         }
         return sqlCache.get(key);

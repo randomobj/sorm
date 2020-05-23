@@ -3,6 +3,10 @@ package com.gitee.randomobject.domain;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * 分页
+ * @param <T> 待返回得实体类对象
+ */
 public class PageVo<T> implements Serializable {
     private List<T> list;
     private long totalSize;

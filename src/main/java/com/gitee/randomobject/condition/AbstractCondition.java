@@ -99,7 +99,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addInQuery(String field, List values) {
+    public Condition addInQuery(String field, List<? extends Object> values) {
         return addInQuery(field, values.toArray(new Object[values.size()]));
     }
 
@@ -113,7 +113,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addNotInQuery(String field, List values) {
+    public Condition addNotInQuery(String field, List<? extends Object> values) {
         return addNotInQuery(field, values.toArray(new Object[values.size()]));
     }
 
@@ -415,6 +415,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     protected Condition done() {
+        //更新，创建新的sql语句条件
         if (query.columnBuilder.length() > 0) {
             query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
         }
@@ -482,6 +483,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     public long update() {
         assureDone();
         assureUpdate();
+        //构建新的sql语句
         sqlBuilder.setLength(0);
         sqlBuilder.append("update " + query.tableName + " as t ");
         addJoinTableStatement();

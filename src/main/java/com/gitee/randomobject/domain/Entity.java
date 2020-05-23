@@ -31,7 +31,7 @@ public class Entity {
      */
     public Property[] properties;
     /**
-     * 唯一约束字段
+     * 唯一索引字段
      */
     public Property[] indexProperties;
     /**

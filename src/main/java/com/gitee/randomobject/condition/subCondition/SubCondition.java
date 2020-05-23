@@ -17,7 +17,7 @@ public interface SubCondition<T> {
 
     <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField);
 
-    <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField, String compositField);
+    <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField, String compositeField);
 
     SubCondition addNullQuery(String field);
 
@@ -27,11 +27,11 @@ public interface SubCondition<T> {
 
     SubCondition addInQuery(String field, Object[] values);
 
-    SubCondition addInQuery(String field, List values);
+    SubCondition addInQuery(String field, List<? extends Object> values);
 
     SubCondition addNotInQuery(String field, Object[] values);
 
-    SubCondition addNotInQuery(String field, List values);
+    SubCondition addNotInQuery(String field, List<? extends Object> values);
 
     SubCondition addQuery(String query);
 
