@@ -85,8 +85,8 @@ public abstract class AbstractDAO implements DAO {
     public <T> T fetch(Class<T> _class, long id) {
         String property = ReflectionUtil.entityMap.get(_class.getName()).id.name;
         List<T> ts = fetchList(_class, property, id);
-        if (null == ts){
-            logger.debug("[不存在此id的数据记录]id:{}",id);
+        if (null == ts) {
+            logger.debug("[不存在此id的数据记录]id:{}", id);
             return null;
         }
         return ts.get(0);
@@ -180,9 +180,11 @@ public abstract class AbstractDAO implements DAO {
                 effect = ps.executeUpdate();
             } else {
                 Condition condition = getUniqueCondition(instance);
-                if (condition.count()>0){//存在唯一性约束，
-                    logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
-                    return effect;
+                if(null !=condition){
+                    if (condition.count() > 0) {//存在唯一性约束，
+                        logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
+                        return effect;
+                    }
                 }
                 //插入
                 String insertIgnore = sqlHelper.insertIgnore(_class, syntaxHandler.getSyntax(Syntax.InsertIgnore));
