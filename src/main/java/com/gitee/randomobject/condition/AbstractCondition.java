@@ -552,11 +552,11 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public List<T> getList() {
-        return getArray().toJavaList(query._class);
+        return getJSONArray().toJavaList(query._class);
     }
 
     @Override
-    public JSONArray getArray() {
+    public JSONArray getJSONArray() {
         assureDone();
         sqlBuilder.setLength(0);
         sqlBuilder.append("select " + query.distinct + " " + query.sqlHelper.columns(query.className, "t") + " from " + query.tableName + " as t ");
@@ -678,21 +678,21 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public PageVo<T> getPagingList() {
+    public PageVo<T> getPageVoList() {
         getPageVo();
         pageVo.setList(getList());
         return pageVo;
     }
 
     @Override
-    public PageVo<T> getPartPagingList() {
+    public PageVo<T> getPartPageVoList() {
         getPageVo();
         pageVo.setList(getPartList());
         return pageVo;
     }
 
     @Override
-    public PageVo<T> getCompositPagingList() {
+    public PageVo<T> getCompositPageVoList() {
         getPageVo();
         pageVo.setList(getCompositList());
         return pageVo;
@@ -700,12 +700,12 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public List<T> getCompositList() {
-        JSONArray array = getCompositArray();
+        JSONArray array = getCompositJSONArray();
         return array.toJavaList(query._class);
     }
 
     @Override
-    public JSONArray getCompositArray() {
+    public JSONArray getCompositJSONArray() {
         assureDone();
         //保证每个方法进入时，都是重新生成查询字符串
         sqlBuilder.setLength(0);

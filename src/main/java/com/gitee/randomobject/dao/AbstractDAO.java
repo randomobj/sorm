@@ -169,9 +169,11 @@ public abstract class AbstractDAO implements DAO {
             Entity entity = ReflectionUtil.entityMap.get(_class.getName());
             if (exist(instance)) { //如果返回true，那么一定是存在id
                 Condition condition = getUniqueCondition(instance);
-                List<Long> ids = condition.getValueList(Long.class, entity.id.name);
-                if (ids.size() > 0) {
-                    entity.id.field.setLong(instance, ids.get(0));
+                if (null != condition) {
+                    List<Long> ids = condition.getValueList(Long.class, entity.id.name);
+                    if (ids.size() > 0) {
+                        entity.id.field.setLong(instance, ids.get(0));
+                    }
                 }
                 //根据id更新
                 String updateById = sqlHelper.updateById(_class);
@@ -180,7 +182,7 @@ public abstract class AbstractDAO implements DAO {
                 effect = ps.executeUpdate();
             } else {
                 Condition condition = getUniqueCondition(instance);
-                if(null !=condition){
+                if (null != condition) {
                     if (condition.count() > 0) {//存在唯一性约束，
                         logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
                         return effect;
@@ -351,21 +353,6 @@ public abstract class AbstractDAO implements DAO {
         }
         try {
             connection.rollback();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 事务回滚
-     */
-    @Override
-    public void rollback(Savepoint savePoint) {
-        if (connection == null) {
-            return;
-        }
-        try {
-            connection.rollback(savePoint);
         } catch (SQLException e) {
             e.printStackTrace();
         }

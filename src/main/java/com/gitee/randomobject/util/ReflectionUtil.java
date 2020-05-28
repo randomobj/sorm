@@ -110,6 +110,7 @@ public class ReflectionUtil {
             if (indexOf >= 0) {
                 sqlBuilder.replace(indexOf, indexOf + placeHolder.length(), parameter);
             }
+            //下一个参数下标
             parameterIndex++;
         }
         return sqlBuilder.toString();

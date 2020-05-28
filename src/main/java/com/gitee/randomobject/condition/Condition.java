@@ -8,7 +8,7 @@ import com.gitee.randomobject.domain.PageVo;
 import java.util.List;
 
 /**
- * 查询条件接口
+ * 复杂查询条件接口
  */
 public interface Condition<T> {
 
@@ -73,15 +73,18 @@ public interface Condition<T> {
     Condition addBetweenQuery(String field, Object start, Object end);
 
     /**
+     * 模糊查询
      * 添加自定义查询条件
      *
-     * @param field 指明字段
+     * @param field 指明需要模糊查询的字段
      * @param value 字段值
      */
     Condition addLikeQuery(String field, Object value);
 
     /**
-     * 添加自定义查询条件
+     * 添加自定义查询语句
+     * <p>Example t.+field+ like ?</p></br>
+     * <p>Example t.+filed+ BETWEEN  + ? +  AND  + ? ; </p>
      *
      * @param query 子查询条件(<b>主表</b>统一别名为t)
      */
@@ -180,8 +183,8 @@ public interface Condition<T> {
      * <p><b>子表,第一次调用JoinTable方法关联的表别名为t1，第二个为t2,以此类推</b></p>
      *
      * @param _class         要关联的表
-     * @param primaryField   <b>主表</b>关联字段
-     * @param joinTableField <b>子表</b>关联字段
+     * @param primaryField   <b>主表</b>中的关联字段
+     * @param joinTableField <b>子表</b>中的关联字段
      */
     <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField);
 
@@ -191,9 +194,9 @@ public interface Condition<T> {
      * <p><b>子表,第一次调用JoinTable方法关联的表别名为t1，第二个为t2,以此类推</b></p>
      *
      * @param _class         要关联的表
-     * @param primaryField   <b>主表</b>关联字段
-     * @param joinTableField <b>子表</b>关联字段
-     * @param compositField  <b>主表</b>关联字段对应复杂字段的字段名
+     * @param primaryField   <b>主表</b>中的关联字段
+     * @param joinTableField <b>子表</b>中的关联字段
+     * @param compositField  <b>主表</b>中关联字段对应的复杂的字段名称
      */
     <T> SubCondition<T> joinTable(Class<T> _class, String primaryField, String joinTableField, String compositField);
 
@@ -264,7 +267,7 @@ public interface Condition<T> {
     /**
      * 返回符合条件的数据库记录
      */
-    JSONArray getArray();
+    JSONArray getJSONArray();
 
     /**
      * <p>返回指定单个字段的集合</p>
@@ -291,19 +294,19 @@ public interface Condition<T> {
      * <p>返回符合条件的数据库分页记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
      */
-    PageVo<T> getPagingList();
+    PageVo<T> getPageVoList();
 
     /**
      * <p>返回指定的部分字段的数据库记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
      */
-    PageVo<T> getPartPagingList();
+    PageVo<T> getPartPageVoList();
 
     /**
      * <p>返回符合条件的数据库分页记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
      */
-    PageVo<T> getCompositPagingList();
+    PageVo<T> getCompositPageVoList();
 
     /**
      * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
@@ -315,7 +318,7 @@ public interface Condition<T> {
      * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
      * <p><b>注意</b>:若未调用过joinTable方法,则该方法不会返回复杂对象字段信息</p>
      */
-    JSONArray getCompositArray();
+    JSONArray getCompositJSONArray();
 
     /**
      * <p>克隆该Condition对象</p>

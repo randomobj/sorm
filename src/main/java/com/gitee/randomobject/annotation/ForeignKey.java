@@ -18,6 +18,7 @@ public @interface ForeignKey {
 
     /**
      * 关联字段
+     * 默认关联主键id
      */
     String field() default "id";
 

@@ -89,7 +89,7 @@ public interface DAO {
     long clear(Class _class);
 
     /**
-     * 开启事务
+     * <p>开启事务</p>
      */
     void startTransaction();
 
@@ -97,11 +97,6 @@ public interface DAO {
      * 事务回滚
      */
     void rollback();
-
-    /**
-     * 事务回滚
-     */
-    void rollback(Savepoint savePoint);
 
     /**
      * 事务提交
