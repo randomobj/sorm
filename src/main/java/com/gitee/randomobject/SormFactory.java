@@ -10,12 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import javax.xml.soap.SAAJResult;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.function.Predicate;
 
 public class SormFactory {
     Logger logger = LoggerFactory.getLogger(SormFactory.class);
