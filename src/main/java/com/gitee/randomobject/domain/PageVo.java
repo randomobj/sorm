@@ -8,7 +8,7 @@ import java.util.List;
  * @param <T> 待返回得实体类对象
  */
 public class PageVo<T> implements Serializable {
-    private transient List<T> list;
+    private List<T> list;
     private long totalSize;
     private int totalPage;
     private int pageSize;
