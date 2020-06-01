@@ -85,11 +85,12 @@ public abstract class AbstractDAO implements DAO {
     public <T> T fetch(Class<T> _class, long id) {
         String property = ReflectionUtil.entityMap.get(_class.getName()).id.name;
         List<T> ts = fetchList(_class, property, id);
-        if (null == ts) {
+        if(ValidateUtil.isNotEmpty(ts)){
+            return ts.get(0);
+        }else{
             logger.debug("[不存在此id的数据记录]id:{}", id);
             return null;
         }
-        return ts.get(0);
     }
 
     @Override
