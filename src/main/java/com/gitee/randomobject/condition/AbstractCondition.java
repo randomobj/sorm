@@ -45,10 +45,14 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
      */
     private int joinTableIndex = 1;
 
-    /**带有统计和分页信息的集合*/
+    /**
+     * 带有统计和分页信息的集合
+     */
     protected PageVo<T> pageVo = null;
 
-    /**查询*/
+    /**
+     * 查询
+     */
     protected Query query;
 
     public AbstractCondition(Class<T> _class, DataSource dataSource, AbstractDAO abstractDAO, SyntaxHandler syntaxHandler, SQLHelper sqlHelper) {
@@ -173,7 +177,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             return this;
         }
         if (value instanceof String) {
-            addLikeQuery(field,value);
+            addLikeQuery(field, value);
         } else {
             addQuery(field, "=", value);
         }
@@ -797,7 +801,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             throw new IllegalArgumentException("请先调用page()分页函数!");
         }
         pageVo.setTotalSize(count());
-        pageVo.setTotalPage(pageVo.getTotalSize() / pageVo.getPageSize() + pageVo.getTotalSize() % pageVo.getPageSize() > 0 ? (int) (pageVo.getTotalSize() / pageVo.getPageSize() + 1) : (int)(pageVo.getTotalSize() / pageVo.getPageSize()));
+        pageVo.setTotalPage(pageVo.getTotalSize() % pageVo.getPageSize() > 0 ? (int) (pageVo.getTotalSize() / pageVo.getPageSize() + 1) : (int) (pageVo.getTotalSize() / pageVo.getPageSize()));
         pageVo.setHasMore(pageVo.getCurrentPage() < pageVo.getTotalPage());
         return pageVo;
     }
@@ -818,10 +822,10 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             Entity entity = ReflectionUtil.entityMap.get(subQuery.className);
             if (subQuery.parentSubQuery == null) {
                 //如果parentSubCondition为空,则为主表关联子表
-                sqlBuilder.append(subQuery.join + " " + query.syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " as " + subQuery.tableAliasName + " on t." + query.syntaxHandler.getSyntax(Syntax.Escape,subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape,subQuery.joinTableField) + " ");
+                sqlBuilder.append(subQuery.join + " " + query.syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " as " + subQuery.tableAliasName + " on t." + query.syntaxHandler.getSyntax(Syntax.Escape, subQuery.primaryField) + " = " + subQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape, subQuery.joinTableField) + " ");
             } else {
                 //如果parentSubCondition不为空,则为子表关联子表
-                sqlBuilder.append(subQuery.join + " " + query.syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape,subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape,subQuery.primaryField) + " ");
+                sqlBuilder.append(subQuery.join + " " + query.syntaxHandler.getSyntax(Syntax.Escape, entity.tableName) + " as " + subQuery.tableAliasName + " on " + subQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape, subQuery.joinTableField) + " = " + subQuery.parentSubQuery.tableAliasName + "." + query.syntaxHandler.getSyntax(Syntax.Escape, subQuery.primaryField) + " ");
             }
         }
     }

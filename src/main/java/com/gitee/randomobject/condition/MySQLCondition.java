@@ -9,7 +9,11 @@ import javax.sql.DataSource;
 
 public class MySQLCondition extends AbstractCondition {
 
-    public MySQLCondition(Class _class, DataSource dataSource, AbstractDAO abstractDAO, SyntaxHandler syntaxHandler, SQLHelper sqlHelper) {
+    public MySQLCondition(Class _class,
+                          DataSource dataSource,
+                          AbstractDAO abstractDAO,
+                          SyntaxHandler syntaxHandler,
+                          SQLHelper sqlHelper) {
         super(_class, dataSource, abstractDAO, syntaxHandler, sqlHelper);
     }
 
