@@ -2,6 +2,7 @@ package com.gitee.randomobject;
 
 import com.gitee.randomobject.dao.AbstractDAO;
 import com.gitee.randomobject.dao.DAO;
+import com.gitee.randomobject.dao.MariaDBDAO;
 import com.gitee.randomobject.dao.MySQLDAO;
 import com.gitee.randomobject.util.ReflectionUtil;
 import com.gitee.randomobject.util.SormConfig;
@@ -19,9 +20,10 @@ public class SormFactory {
     Logger logger = LoggerFactory.getLogger(SormFactory.class);
     private final static HashMap<String, Class> driverMapping = new HashMap();
 
-    //目前只支持mysql
+    //目前只支持mysql和mariadb
     static {
         driverMapping.put("jdbc:mysql", MySQLDAO.class);
+        driverMapping.put("jdbc:mariadb", MariaDBDAO.class);
     }
 
     private SormFactory() {
