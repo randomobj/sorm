@@ -29,7 +29,7 @@ public class SormFactory {
     private SormFactory() {
     }
 
-    public SormFactory newInstance() {
+    public static SormFactory newInstance() {
         return SormFactoryBuilder.INSTANCE.sormFactory;
     }
 
