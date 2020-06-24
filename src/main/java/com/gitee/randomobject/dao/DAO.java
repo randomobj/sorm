@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * 数据库更新操作
+ * 数据库相关操作
  */
 public interface DAO {
 

@@ -5,5 +5,6 @@ public enum Syntax {
     AutoIncrement,
     InsertIgnore,
     Comment,
-    Escape;
+    Escape
+
 }

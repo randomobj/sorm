@@ -282,7 +282,7 @@ public class ReflectionUtil {
 
         Set<String> keySet = SormConfig.packageNameMap.keySet();
         for (String packageName : keySet) {
-            List<Class> classList = scanEntity(packageName);
+            List<Class> classList = scanEntity(packageName); //加载指定路径下类的信息
             for (Class c : classList) {
                 Entity entity = new Entity();
                 if(c.getDeclaredAnnotation(TableName.class)!=null){
@@ -313,7 +313,7 @@ public class ReflectionUtil {
                 /**外键约束属性列表*/
                 List<Property> foreignKeyPropertyList = new ArrayList<>();
                 /**实体包类列表*/
-                List<Field> compositFieldList = new ArrayList<>();
+                List<Field> compositeFieldList = new ArrayList<>();
                 //添加字段信息
                 {
                     Field[] fields = c.getDeclaredFields();
@@ -325,7 +325,7 @@ public class ReflectionUtil {
                         }
                         //记录实体包类
                         if (isCompositProperty(fields[i].getType())) {
-                            compositFieldList.add(fields[i]);
+                            compositeFieldList.add(fields[i]);
                             continue;
                         }
                         Property property = new Property();
@@ -373,8 +373,8 @@ public class ReflectionUtil {
                     fields[i] = entity.properties[i].field;
                 }
                 entity.fields = fields;
-                if (compositFieldList.size() > 0) {
-                    entity.compositFields = compositFieldList.toArray(new Field[0]);
+                if (compositeFieldList.size() > 0) {
+                    entity.compositFields = compositeFieldList.toArray(new Field[0]);
                 }
                 if (indexPropertyList.size() > 0) {
                     entity.indexProperties = indexPropertyList.toArray(new Property[0]);
@@ -398,7 +398,7 @@ public class ReflectionUtil {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         URL url = classLoader.getResource(packageNamePath);
         if (url == null) {
-            throw new IllegalArgumentException("无法识别的包路径:" + packageNamePath);
+            throw new IllegalArgumentException("无法识别的文件路径:" + packageNamePath);
         }
         List<Class> classList = new ArrayList<>();
         switch (url.getProtocol()) {

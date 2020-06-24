@@ -4,6 +4,7 @@ public class MySQLSyntaxHandler extends AbstractSyntaxHandler {
 
     @Override
     public String getSyntax(Syntax syntax, Object... values) {
+
         switch (syntax) {
             case AutoIncrement: {
                 return "auto_increment";

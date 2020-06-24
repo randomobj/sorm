@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SQLHelper implements Serializable {
 
     private SyntaxHandler syntaxHandler;
-    //缓存执行过得SQL语句
-    private ConcurrentHashMap<String, String> sqlCache = new ConcurrentHashMap<>();
+
+    private ConcurrentHashMap<String, String> sqlCache = new ConcurrentHashMap<>();//缓存执行过的SQL语句
 
     public SQLHelper(SyntaxHandler syntaxHandler) {
         this.syntaxHandler = syntaxHandler;

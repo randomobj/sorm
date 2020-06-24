@@ -28,7 +28,7 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 字段映射
      */
-    protected Map<String, String> fieldMapping = new HashMap<String, String>();
+    protected Map<String, String> fieldMapping = new HashMap<>();
     protected DataSource dataSource;
     protected Connection connection;
 
@@ -44,7 +44,7 @@ public abstract class AbstractDAO implements DAO {
     /**
      * 是否开启事务
      */
-    public boolean startTranscation = false;
+    public boolean startTransactional = false;
 
     public AbstractDAO(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -86,9 +86,9 @@ public abstract class AbstractDAO implements DAO {
     public <T> T fetch(Class<T> _class, long id) {
         String property = ReflectionUtil.entityMap.get(_class.getName()).id.name;
         List<T> ts = fetchList(_class, property, id);
-        if(ValidateUtil.isNotEmpty(ts)){
+        if (ValidateUtil.isNotEmpty(ts)) {
             return ts.get(0);
-        }else{
+        } else {
             logger.debug("[不存在此id的数据记录]id:{}", id);
             return null;
         }
@@ -101,12 +101,12 @@ public abstract class AbstractDAO implements DAO {
             int count = -1;
             if (value == null) {
                 String fetchNullSQL = sqlHelper.fetchNull(_class, property);
-                logger.debug("[根据属性{}=>{}获取对象]执行sql:{}", property, value, fetchNullSQL);
+                logger.debug("[根据属性{},value{},获取对象]执行sql:{}", property, value, fetchNullSQL);
                 ps = connection.prepareStatement(fetchNullSQL);
                 count = (int) query(_class).addNullQuery(property).count();
             } else {
                 String fetchSQL = sqlHelper.fetch(_class, property);
-                logger.debug("[根据属性{}=>{}获取对象]执行sql:{}", property, value, fetchSQL.replace("?", value.toString()));
+                logger.debug("[根据属性{},value{},{}获取对象]执行sql:{}", property, value, fetchSQL.replace("?", value.toString()));
                 ps = connection.prepareStatement(fetchSQL);
                 switch (value.getClass().getSimpleName().toLowerCase()) {
                     case "int": {
@@ -209,7 +209,7 @@ public abstract class AbstractDAO implements DAO {
             if (ps != null) {
                 ps.close();
             }
-            if (!startTranscation) {
+            if (!startTransactional) {
                 connection.close();
             }
             return effect;
@@ -266,7 +266,7 @@ public abstract class AbstractDAO implements DAO {
                 preparedStatements[i].close();
             }
             //未开启事务，提交
-            if (!startTranscation) {
+            if (!startTransactional) {
                 connection.commit();
                 connection.close();
             }
@@ -298,7 +298,7 @@ public abstract class AbstractDAO implements DAO {
             logger.debug("[根据属性{}=>{}删除]执行SQL:{}", field, value, deleteSQL.replace("?", value.toString()));
             long effect = ps.executeUpdate();
             ps.close();
-            if (!startTranscation) {
+            if (!startTransactional) {
                 connection.close();
             }
             return effect;
@@ -317,7 +317,7 @@ public abstract class AbstractDAO implements DAO {
             PreparedStatement ps = connection.prepareStatement(deleteSQL);
             long effect = ps.executeUpdate();
             ps.close();
-            if (!startTranscation) {
+            if (!startTransactional) {
                 connection.close();
             }
             return effect;
@@ -332,10 +332,11 @@ public abstract class AbstractDAO implements DAO {
      */
     @Override
     public void startTransaction() {
-        startTranscation = true;
+        startTransactional = true;
         try {
             connection = getConnection();
         } catch (SQLException e) {
+            //获取数据库连接失败时，需要关闭当前对象的数据库连接，必须保证当前事务在当前对象的数据库连接中
             e.printStackTrace();
             try {
                 connection.close();
@@ -380,7 +381,7 @@ public abstract class AbstractDAO implements DAO {
      */
     @Override
     public void endTransaction() {
-        startTranscation = false;
+        startTransactional = false;
         if (connection == null) {
             logger.warn("数据库事务连接为空!不做任何操作!");
             return;
@@ -452,7 +453,7 @@ public abstract class AbstractDAO implements DAO {
      */
     public Connection getConnection() throws SQLException {
         //开启事务时使用同一Connection,不开启事务时从连接池中获取
-        if (startTranscation) {
+        if (startTransactional) {
             synchronized (this) {
                 if (connection == null) {
                     connection = dataSource.getConnection();

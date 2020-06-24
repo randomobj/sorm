@@ -29,23 +29,6 @@ public class SormFactory {
     private SormFactory() {
     }
 
-    private enum SormFactoryBuilder {
-        INSTANCE;
-        private SormFactory sormFactory;
-
-        SormFactoryBuilder() {
-            this.sormFactory = new SormFactory();
-        }
-
-        public SormFactory getSormFactory(){
-            return sormFactory;
-        }
-    }
-
-    public static SormFactory newInstance() {
-        return  SormFactoryBuilder.INSTANCE.getSormFactory();
-    }
-
     public SormFactory dataSource(DataSource dataSource) {
         SormConfig.dataSource = dataSource;
         return this;
@@ -95,17 +78,17 @@ public class SormFactory {
             Set<String> keySet = driverMapping.keySet();
             for (String key : keySet) {
                 if (url.contains(key)) {
-                    //反射调用构造方法创建DAO的实例对象，此处利用java的多态，运行时的动态绑定。
                     dao = (AbstractDAO) driverMapping.get(key).getConstructor(DataSource.class).newInstance(SormConfig.dataSource);
                     break;
                 }
             }
             if (dao == null) {
-                throw new UnsupportedOperationException("当前数据源没有合适的适配器.数据源地址:" + url);
+                throw new UnsupportedOperationException("当前数据源没有合适的适配器=>数据源地址:" + url);
             }
-            ReflectionUtil.getEntityInfo();
-            //自动建表
-            dao.autoBuildDatabase();
+
+            ReflectionUtil.getEntityInfo();//获取指定路径下实体类信息
+
+            dao.autoBuildDatabase(); //自动建表
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);

@@ -508,7 +508,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             logger.debug("[Update]执行SQL:{}", sql);
             effect = ps.executeUpdate();
             ps.close();
-            if (!query.abstractDAO.startTranscation) {
+            if (!query.abstractDAO.startTransactional) {
                 connection.close();
             }
         } catch (SQLException e) {
@@ -535,7 +535,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             logger.debug("[Delete]执行SQL:{}", sql);
             effect = ps.executeUpdate();
             ps.close();
-            if (!query.abstractDAO.startTranscation) {
+            if (!query.abstractDAO.startTransactional) {
                 connection.close();
             }
         } catch (SQLException e) {
