@@ -29,6 +29,10 @@ public class SormFactory {
     private SormFactory() {
     }
 
+    public SormFactory newInstance() {
+        return SormFactoryBuilder.INSTANCE.sormFactory;
+    }
+
     public SormFactory dataSource(DataSource dataSource) {
         SormConfig.dataSource = dataSource;
         return this;
@@ -94,6 +98,21 @@ public class SormFactory {
             throw new RuntimeException(e);
         }
         return dao;
+    }
+
+    private enum SormFactoryBuilder {
+        INSTANCE;
+
+        private SormFactory sormFactory;
+
+        SormFactoryBuilder() {
+            this.sormFactory = new SormFactory();
+        }
+
+        public SormFactory getInstance() {
+            return sormFactory;
+        }
+
     }
 
 }
