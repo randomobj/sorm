@@ -48,7 +48,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     /**
      * 带有统计和分页信息的集合
      */
-    protected PageVo<T> pageVo = null;
+    protected Page<T> page = null;
 
     /**
      * 查询
@@ -221,11 +221,11 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             }
             if (queryCondition.containsKey("_orderBy")) {
                 if (queryCondition.get("_orderBy") instanceof String) {
-                    orderBy(queryCondition.getString("_orderBy"));
+                    orderByAsc(queryCondition.getString("_orderBy"));
                 } else if (queryCondition.get("_orderBy") instanceof JSONArray) {
                     JSONArray array = queryCondition.getJSONArray("_orderBy");
                     for (int i = 0; i < array.size(); i++) {
-                        orderBy(array.getString(i));
+                        orderByAsc(array.getString(i));
                     }
                 }
             }
@@ -385,7 +385,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition orderBy(String field) {
+    public Condition orderByAsc(String field) {
         query.orderByBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " asc,");
         return this;
     }
@@ -405,9 +405,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     @Override
     public Condition page(int pageNum, int pageSize) {
         query.limit = "limit " + (pageNum - 1) * pageSize + "," + pageSize;
-        pageVo = new PageVo<>();
-        pageVo.setPageSize(pageSize);
-        pageVo.setCurrentPage(pageNum);
+        page = new Page<>();
+        page.setPageSize(pageSize);
+        page.setCurrentPage(pageNum);
         return this;
     }
 
@@ -682,24 +682,24 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public PageVo<T> getPageVoList() {
-        getPageVo();
-        pageVo.setList(getList());
-        return pageVo;
+    public Page<T> getPageList() {
+        getPage();
+        page.setList(getList());
+        return page;
     }
 
     @Override
-    public PageVo<T> getPartPageVoList() {
-        getPageVo();
-        pageVo.setList(getPartList());
-        return pageVo;
+    public Page<T> getPartPageList() {
+        getPage();
+        page.setList(getPartList());
+        return page;
     }
 
     @Override
-    public PageVo<T> getCompositPageVoList() {
-        getPageVo();
-        pageVo.setList(getCompositList());
-        return pageVo;
+    public Page<T> getCompositPageList() {
+        getPage();
+        page.setList(getCompositList());
+        return page;
     }
 
     @Override
@@ -796,14 +796,14 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         return "[Condition]类[" + query.className + "],where子句:[" + query.whereBuilder.toString() + "],参数列表:[" + query.parameterList + "],排序:[" + query.orderByBuilder.toString() + "],分页:[" + query.limit + "]";
     }
 
-    private PageVo<T> getPageVo() {
-        if (pageVo == null) {
+    private Page<T> getPage() {
+        if (page == null) {
             throw new IllegalArgumentException("请先调用page()分页函数!");
         }
-        pageVo.setTotalSize(count());
-        pageVo.setTotalPage(pageVo.getTotalSize() % pageVo.getPageSize() > 0 ? (int) (pageVo.getTotalSize() / pageVo.getPageSize() + 1) : (int) (pageVo.getTotalSize() / pageVo.getPageSize()));
-        pageVo.setHasMore(pageVo.getCurrentPage() < pageVo.getTotalPage());
-        return pageVo;
+        page.setTotalSize(count());
+        page.setTotalPage(page.getTotalSize() % page.getPageSize() > 0 ? (int) (page.getTotalSize() / page.getPageSize() + 1) : (int) (page.getTotalSize() / page.getPageSize()));
+        page.setHasMore(page.getCurrentPage() < page.getTotalPage());
+        return page;
     }
 
     protected void addMainTableParameters(PreparedStatement ps) throws SQLException {

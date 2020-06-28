@@ -17,7 +17,9 @@ import java.util.HashMap;
 import java.util.Set;
 
 public class SormFactory {
+
     Logger logger = LoggerFactory.getLogger(SormFactory.class);
+
     private final static HashMap<String, Class> driverMapping = new HashMap();
 
     //目前只支持mysql和mariadb

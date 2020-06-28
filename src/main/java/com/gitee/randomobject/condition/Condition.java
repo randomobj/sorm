@@ -3,7 +3,7 @@ package com.gitee.randomobject.condition;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.randomobject.condition.subCondition.SubCondition;
-import com.gitee.randomobject.domain.PageVo;
+import com.gitee.randomobject.domain.Page;
 
 import java.util.List;
 
@@ -205,7 +205,7 @@ public interface Condition<T> {
      *
      * @param field 升序排列字段名
      */
-    Condition orderBy(String field);
+    Condition orderByAsc(String field);
 
     /**
      * 根据指定字段降序排列
@@ -294,19 +294,19 @@ public interface Condition<T> {
      * <p>返回符合条件的数据库分页记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
      */
-    PageVo<T> getPageVoList();
+    Page<T> getPageList();
 
     /**
      * <p>返回指定的部分字段的数据库记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
      */
-    PageVo<T> getPartPageVoList();
+    Page<T> getPartPageList();
 
     /**
      * <p>返回符合条件的数据库分页记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
      */
-    PageVo<T> getCompositPageVoList();
+    Page<T> getCompositPageList();
 
     /**
      * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>

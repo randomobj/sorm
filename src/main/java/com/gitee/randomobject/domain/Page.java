@@ -7,7 +7,7 @@ import java.util.List;
  * 分页
  * @param <T> 待返回得实体类对象
  */
-public class PageVo<T> implements Serializable {
+public class Page<T> implements Serializable {
     private List<T> list;
     private long totalSize;
     private int totalPage;
