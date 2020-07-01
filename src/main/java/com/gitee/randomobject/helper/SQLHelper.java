@@ -9,6 +9,7 @@ import com.gitee.randomobject.util.ReflectionUtil;
 import com.gitee.randomobject.util.StringUtil;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SQLHelper implements Serializable {
@@ -191,20 +192,25 @@ public class SQLHelper implements Serializable {
      * 返回不包含指定列名的SQL语句
      */
     public String columnsNot(String field, String className, String tableAlias) {
-        String key = "columnTable_" + className + "_" + tableAlias;
-        if (!sqlCache.containsKey(key)) {
-            StringBuilder builder = new StringBuilder();
-            Property[] properties = ReflectionUtil.entityMap.get(className).properties;
-            for (Property property : properties) {
-                if (property.column.equals(field)){
-                    continue;
+        StringBuilder builder = new StringBuilder();
+        Entity entity = ReflectionUtil.entityMap.get(className);
+        List<String> notColumns = entity.notColumns;
+        notColumns.add(field);
+        Property[] properties = entity.properties;
+        outside:
+        for (Property property : properties) {
+            if (notColumns.size() > 0) {
+                //排除字段
+                for (String notColumn : notColumns) {
+                    if (property.column.equals(notColumn)) {
+                        continue outside;
+                    }
                 }
-                builder.append(tableAlias + "." + syntaxHandler.getSyntax(Syntax.Escape, property.column) + " as " + tableAlias + "_" + property.column + ",");
             }
-            builder.deleteCharAt(builder.length() - 1);
-            sqlCache.put(key, builder.toString());
+            builder.append(tableAlias + "." + syntaxHandler.getSyntax(Syntax.Escape, property.column) + " as " + tableAlias + "_" + property.column + ",");
         }
-        return sqlCache.get(key);
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
     }
 
     /**

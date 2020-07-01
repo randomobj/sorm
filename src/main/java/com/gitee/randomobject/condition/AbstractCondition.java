@@ -420,7 +420,9 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public Condition addNotColumn(String field) {
-        query.sqlHelper.columnsNot(field,query.className, "t");
+        String t = query.sqlHelper.columnsNot(field, query.className, "t");
+        StringBuilder notStr = new StringBuilder(t);
+        query.addNotColumnBuilder = notStr;
         return this;
     }
 
@@ -689,12 +691,12 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public List<T> getNotPartList() {
-        if (query.addColumnBuilder.length() == 0) {
+        if (query.addNotColumnBuilder.length() == 0) {
             throw new IllegalArgumentException("请先调用addNotColumn()函数!");
         }
         assureDone();
         sqlBuilder.setLength(0);
-        sqlBuilder.append("select " + query.distinct + " " + query.sqlHelper.columns(query.className, "t") + " from " + query.tableName + " as t ");
+        sqlBuilder.append("select " + query.distinct + " " + query.addNotColumnBuilder.toString() + " from " + query.tableName + " as t ");
         addJoinTableStatement();
         addWhereStatement();
         sqlBuilder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
@@ -705,7 +707,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             addMainTableParameters(ps);
             addJoinTableParameters(ps);
             int count = (int) count();
-            logger.debug("[getPartList]执行SQL:{}", sql);
+            logger.debug("[getNotPartList]执行SQL:{}", sql);
             ResultSet resultSet = ps.executeQuery();
             JSONArray array = ReflectionUtil.mappingResultSetToJSONArray(resultSet, count);
             List<T> instanceList = array.toJavaList(query._class);

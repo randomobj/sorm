@@ -1,6 +1,8 @@
 package com.gitee.randomobject.domain;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 实体类信息
@@ -50,4 +52,9 @@ public class Entity {
      * Field数组(实体包类)
      */
     public Field[] compositFields;
+
+    /**
+     * 不包含的列名
+     */
+    public List<String> notColumns = new ArrayList<>();
 }
