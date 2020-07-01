@@ -32,9 +32,13 @@ public final class Query implements Serializable {
      */
     public String distinct = "";
     /**
-     * 列名
+     * 需要返回的列名
      */
-    public StringBuilder columnBuilder = new StringBuilder();
+    public StringBuilder addColumnBuilder = new StringBuilder();
+    /**
+     * 不需要返回的列名
+     */
+    public StringBuilder addNotColumnBuilder = new StringBuilder();
     /**
      * 聚合函数列名
      */

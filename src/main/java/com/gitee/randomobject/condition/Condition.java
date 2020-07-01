@@ -238,6 +238,12 @@ public interface Condition<T> {
     Condition addColumn(String field);
 
     /**
+     * 排除不需要返回的字段，用于<b>{@link Condition#getPartList()}</b>
+     * @param field 不需要返回的字段
+     */
+    Condition addNotColumn(String field);
+
+    /**
      * 获取符合条件的总数目
      */
     long count();
@@ -291,6 +297,12 @@ public interface Condition<T> {
     List<T> getPartList();
 
     /**
+     * <p>返回不包含指定字段的数据库记录</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
+     */
+    List<T> getNotPartList();
+
+    /**
      * <p>返回符合条件的数据库分页记录</p>
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
      */
@@ -301,6 +313,12 @@ public interface Condition<T> {
      * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
      */
     Page<T> getPartPageList();
+
+    /**
+     * <p>返回不包含指定字段的数据库记录</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addNotColumn(String)} </b></p>
+     */
+    Page<T> getNotPartPageList();
 
     /**
      * <p>返回符合条件的数据库分页记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>

@@ -414,14 +414,20 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     @Override
     public Condition addColumn(String field) {
         field = StringUtil.Camel2Underline(field);
-        query.columnBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + " as " + query.syntaxHandler.getSyntax(Syntax.Escape, "t_" + field) + ",");
+        query.addColumnBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + " as " + query.syntaxHandler.getSyntax(Syntax.Escape, "t_" + field) + ",");
+        return this;
+    }
+
+    @Override
+    public Condition addNotColumn(String field) {
+        query.sqlHelper.columnsNot(field,query.className, "t");
         return this;
     }
 
     protected Condition done() {
         //更新，创建新的sql语句条件
-        if (query.columnBuilder.length() > 0) {
-            query.columnBuilder.deleteCharAt(query.columnBuilder.length() - 1);
+        if (query.addColumnBuilder.length() > 0) {
+            query.addColumnBuilder.deleteCharAt(query.addColumnBuilder.length() - 1);
         }
         if (query.aggregateColumnBuilder.length() > 0) {
             query.aggregateColumnBuilder.deleteCharAt(query.aggregateColumnBuilder.length() - 1);
@@ -616,8 +622,8 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         assureDone();
         sqlBuilder.setLength(0);
         sqlBuilder.append("select " + query.distinct + " ");
-        if (query.columnBuilder.toString().length() > 0) {
-            sqlBuilder.append(query.columnBuilder.toString() + ",");
+        if (query.addColumnBuilder.toString().length() > 0) {
+            sqlBuilder.append(query.addColumnBuilder.toString() + ",");
         }
         sqlBuilder.append(query.aggregateColumnBuilder.toString() + " from " + query.tableName + " as t ");
         addJoinTableStatement();
@@ -653,12 +659,42 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
 
     @Override
     public List<T> getPartList() {
-        if (query.columnBuilder.length() == 0) {
+        if (query.addColumnBuilder.length() == 0) {
             throw new IllegalArgumentException("请先调用addColumn()函数!");
         }
         assureDone();
         sqlBuilder.setLength(0);
-        sqlBuilder.append("select " + query.distinct + " " + query.columnBuilder.toString() + " from " + query.tableName + " as t ");
+        sqlBuilder.append("select " + query.distinct + " " + query.addColumnBuilder.toString() + " from " + query.tableName + " as t ");
+        addJoinTableStatement();
+        addWhereStatement();
+        sqlBuilder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
+        sql = sqlBuilder.toString().replaceAll("\\s+", " ");
+
+        try (Connection connection = query.dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql);) {
+            addMainTableParameters(ps);
+            addJoinTableParameters(ps);
+            int count = (int) count();
+            logger.debug("[getPartList]执行SQL:{}", sql);
+            ResultSet resultSet = ps.executeQuery();
+            JSONArray array = ReflectionUtil.mappingResultSetToJSONArray(resultSet, count);
+            List<T> instanceList = array.toJavaList(query._class);
+            ps.close();
+            return instanceList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public List<T> getNotPartList() {
+        if (query.addColumnBuilder.length() == 0) {
+            throw new IllegalArgumentException("请先调用addNotColumn()函数!");
+        }
+        assureDone();
+        sqlBuilder.setLength(0);
+        sqlBuilder.append("select " + query.distinct + " " + query.sqlHelper.columns(query.className, "t") + " from " + query.tableName + " as t ");
         addJoinTableStatement();
         addWhereStatement();
         sqlBuilder.append(" " + query.orderByBuilder.toString() + " " + query.limit);
@@ -692,6 +728,13 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     public Page<T> getPartPageList() {
         getPage();
         page.setList(getPartList());
+        return page;
+    }
+
+    @Override
+    public Page<T> getNotPartPageList() {
+        getPage();
+        page.setList(getNotPartList());
         return page;
     }
 

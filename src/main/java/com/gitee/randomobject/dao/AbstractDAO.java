@@ -21,7 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public abstract class AbstractDAO implements DAO {
+public abstract class  AbstractDAO implements DAO {
 
     Logger logger = LoggerFactory.getLogger(AbstractDAO.class);
 

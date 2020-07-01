@@ -188,6 +188,26 @@ public class SQLHelper implements Serializable {
     }
 
     /**
+     * 返回不包含指定列名的SQL语句
+     */
+    public String columnsNot(String field, String className, String tableAlias) {
+        String key = "columnTable_" + className + "_" + tableAlias;
+        if (!sqlCache.containsKey(key)) {
+            StringBuilder builder = new StringBuilder();
+            Property[] properties = ReflectionUtil.entityMap.get(className).properties;
+            for (Property property : properties) {
+                if (property.column.equals(field)){
+                    continue;
+                }
+                builder.append(tableAlias + "." + syntaxHandler.getSyntax(Syntax.Escape, property.column) + " as " + tableAlias + "_" + property.column + ",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+            sqlCache.put(key, builder.toString());
+        }
+        return sqlCache.get(key);
+    }
+
+    /**
      * 清空表
      *
      * @param aClass 被清空表对应的实体类
