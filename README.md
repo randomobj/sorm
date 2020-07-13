@@ -32,4 +32,9 @@ SormFactory中的静态newInstance方法，返回SormFactory对象
 每一个实体类不能出现自定义的构造方法，否则不能返回关联查询的复杂对象信息和ID主键信息
 
 
-
+#### 项目进度
+- [x] 设计
+- [x] 项目结构
+- [x] mysql
+- [x] MariaDB 
+- [ ] 持续开发
