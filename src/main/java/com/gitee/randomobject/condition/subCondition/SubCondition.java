@@ -1,7 +1,7 @@
 package com.gitee.randomobject.condition.subCondition;
 
 
-import com.gitee.randomobject.condition.Condition;
+import com.gitee.randomobject.condition.SormCondition;
 
 import java.util.List;
 
@@ -55,5 +55,5 @@ public interface SubCondition<T> {
 
     SubCondition doneSubCondition();
 
-    Condition done();
+    SormCondition done();
 }

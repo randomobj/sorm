@@ -2,7 +2,7 @@ package com.gitee.randomobject.dao;
 
 
 import com.alibaba.fastjson.JSON;
-import com.gitee.randomobject.condition.Condition;
+import com.gitee.randomobject.condition.SormCondition;
 import com.gitee.randomobject.domain.Entity;
 import com.gitee.randomobject.domain.Property;
 import com.gitee.randomobject.helper.SQLHelper;
@@ -21,9 +21,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public abstract class  AbstractDAO implements DAO {
+public abstract class AbstractSormDao implements SormDao {
 
-    Logger logger = LoggerFactory.getLogger(AbstractDAO.class);
+    Logger logger = LoggerFactory.getLogger(AbstractSormDao.class);
 
     /**
      * 字段映射
@@ -46,7 +46,7 @@ public abstract class  AbstractDAO implements DAO {
      */
     public boolean startTransactional = false;
 
-    public AbstractDAO(DataSource dataSource) {
+    public AbstractSormDao(DataSource dataSource) {
         this.dataSource = dataSource;
         fieldMapping.put("string", "varchar(255)");
         fieldMapping.put("boolean", "boolean");
@@ -71,11 +71,11 @@ public abstract class  AbstractDAO implements DAO {
                 return true;
             }
             //有唯一性约束则根据唯一性约束查询
-            Condition condition = getUniqueCondition(instance);
-            if (condition == null) {
+            SormCondition sormCondition = getUniqueCondition(instance);
+            if (sormCondition == null) {
                 return false;
             }
-            return condition.count() > 0;
+            return sormCondition.count() > 0;
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -155,7 +155,7 @@ public abstract class  AbstractDAO implements DAO {
     }
 
     @Override
-    public abstract <T> Condition<T> query(Class<T> _class);
+    public abstract <T> SormCondition<T> query(Class<T> _class);
 
     @Override
     public long save(Object instance) {
@@ -170,9 +170,9 @@ public abstract class  AbstractDAO implements DAO {
             //拿到实体类信息
             Entity entity = ReflectionUtil.entityMap.get(_class.getName());
             if (exist(instance)) { //如果返回true，那么一定是存在id
-                Condition condition = getUniqueCondition(instance);
-                if (null != condition) {
-                    List<Long> ids = condition.getValueList(Long.class, entity.id.name);
+                SormCondition sormCondition = getUniqueCondition(instance);
+                if (null != sormCondition) {
+                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
                     if (ids.size() > 0) {
                         entity.id.field.setLong(instance, ids.get(0));
                     }
@@ -183,9 +183,9 @@ public abstract class  AbstractDAO implements DAO {
                 logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(ps, instance, updateById));
                 effect = ps.executeUpdate();
             } else {
-                Condition condition = getUniqueCondition(instance);
-                if (null != condition) {
-                    if (condition.count() > 0) {//存在唯一性约束，
+                SormCondition sormCondition = getUniqueCondition(instance);
+                if (null != sormCondition) {
+                    if (sormCondition.count() > 0) {//存在唯一性约束，
                         logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
                         return effect;
                     }
@@ -469,16 +469,16 @@ public abstract class  AbstractDAO implements DAO {
     /**
      * 获取实例的唯一性约束查询条件
      */
-    private <T> Condition<T> getUniqueCondition(Object instance) throws IllegalAccessException {
+    private <T> SormCondition<T> getUniqueCondition(Object instance) throws IllegalAccessException {
         Property[] properties = ReflectionUtil.entityMap.get(instance.getClass().getName()).uniqueKeyProperties;
         if (properties == null || properties.length == 0) {
             return null;
         }
-        Condition condition = query(instance.getClass());
+        SormCondition sormCondition = query(instance.getClass());
         for (Property property : properties) {
-            condition.addQuery(property.name, property.field.get(instance));
+            sormCondition.addQuery(property.name, property.field.get(instance));
         }
-        return condition;
+        return sormCondition;
     }
 
     /**

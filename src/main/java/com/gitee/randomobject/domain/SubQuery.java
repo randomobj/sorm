@@ -1,7 +1,7 @@
 package com.gitee.randomobject.domain;
 
 
-import com.gitee.randomobject.condition.AbstractCondition;
+import com.gitee.randomobject.condition.AbstractSormCondition;
 import com.gitee.randomobject.condition.subCondition.SubCondition;
 
 import java.io.Serializable;
@@ -65,5 +65,5 @@ public class SubQuery<T> implements Serializable {
     /**
      * 父表查询条件
      */
-    public AbstractCondition condition;
+    public AbstractSormCondition condition;
 }

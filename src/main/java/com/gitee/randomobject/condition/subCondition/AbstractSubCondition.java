@@ -1,7 +1,7 @@
 package com.gitee.randomobject.condition.subCondition;
 
-import com.gitee.randomobject.condition.AbstractCondition;
-import com.gitee.randomobject.condition.Condition;
+import com.gitee.randomobject.condition.AbstractSormCondition;
+import com.gitee.randomobject.condition.SormCondition;
 import com.gitee.randomobject.domain.Query;
 import com.gitee.randomobject.domain.SubQuery;
 import com.gitee.randomobject.syntax.Syntax;
@@ -15,7 +15,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>, Serializable {
 
     public SubQuery subQuery;
 
-    public AbstractSubCondition(Class<T> _class, String tableAliasName, String primaryField, String joinTableField, String compositField, AbstractCondition condition, Query query) {
+    public AbstractSubCondition(Class<T> _class, String tableAliasName, String primaryField, String joinTableField, String compositField, AbstractSormCondition condition, Query query) {
         subQuery = new SubQuery();
         subQuery._class = _class;
         subQuery.className = _class.getName();
@@ -126,7 +126,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>, Serializable {
         if (value instanceof String) {
             subQuery.whereBuilder.append("(" + subQuery.tableAliasName + "." + subQuery.query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(property)) + " " + operator + " ?) and ");
             boolean hasContains = false;
-            for (String pattern : AbstractCondition.patterns) {
+            for (String pattern : AbstractSormCondition.patterns) {
                 if (((String) value).contains(pattern)) {
                     subQuery.parameterList.add(value);
                     hasContains = true;
@@ -166,7 +166,7 @@ public class AbstractSubCondition<T> implements SubCondition<T>, Serializable {
     }
 
     @Override
-    public Condition done() {
+    public SormCondition done() {
         return subQuery.condition;
     }
 

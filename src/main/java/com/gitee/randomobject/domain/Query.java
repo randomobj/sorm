@@ -1,7 +1,7 @@
 package com.gitee.randomobject.domain;
 
 
-import com.gitee.randomobject.dao.AbstractDAO;
+import com.gitee.randomobject.dao.AbstractSormDao;
 import com.gitee.randomobject.helper.SQLHelper;
 import com.gitee.randomobject.syntax.SyntaxHandler;
 
@@ -94,7 +94,7 @@ public final class Query implements Serializable {
     /**
      * 存放关联的DAO对象
      */
-    public transient AbstractDAO abstractDAO;
+    public transient AbstractSormDao abstractDAO;
     /**
      * 差异语法
      */

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.gitee.randomobject.condition.subCondition.AbstractSubCondition;
 import com.gitee.randomobject.condition.subCondition.SubCondition;
-import com.gitee.randomobject.dao.AbstractDAO;
+import com.gitee.randomobject.dao.AbstractSormDao;
 import com.gitee.randomobject.domain.*;
 import com.gitee.randomobject.helper.SQLHelper;
 import com.gitee.randomobject.syntax.Syntax;
@@ -24,9 +24,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
-public class AbstractCondition<T> implements Condition<T>, Serializable {
+public class AbstractSormCondition<T> implements SormCondition<T>, Serializable {
 
-    private Logger logger = LoggerFactory.getLogger(AbstractCondition.class);
+    private Logger logger = LoggerFactory.getLogger(AbstractSormCondition.class);
 
     public final static String[] patterns = new String[]{"%", "_", "[", "[^", "[!", "]"};
 
@@ -55,7 +55,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
      */
     protected Query query;
 
-    public AbstractCondition(Class<T> _class, DataSource dataSource, AbstractDAO abstractDAO, SyntaxHandler syntaxHandler, SQLHelper sqlHelper) {
+    public AbstractSormCondition(Class<T> _class, DataSource dataSource, AbstractSormDao abstractDAO, SyntaxHandler syntaxHandler, SQLHelper sqlHelper) {
         query = new Query();
         query.dataSource = dataSource;
         query.abstractDAO = abstractDAO;
@@ -68,33 +68,33 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition distinct() {
+    public SormCondition distinct() {
         query.distinct = "distinct";
         return this;
     }
 
     @Override
-    public Condition addNullQuery(String field) {
+    public SormCondition addNullQuery(String field) {
         query.whereBuilder.append("(t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " is null) and ");
         return this;
     }
 
     @Override
-    public Condition addNotNullQuery(String field) {
+    public SormCondition addNotNullQuery(String field) {
         //判断字段是否是String类型
         query.whereBuilder.append("(t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " is not null) and ");
         return this;
     }
 
     @Override
-    public Condition addNotEmptyQuery(String field) {
+    public SormCondition addNotEmptyQuery(String field) {
         //判断字段是否是String类型
         query.whereBuilder.append("(t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " is not null and t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " != '') and ");
         return this;
     }
 
     @Override
-    public Condition addInQuery(String field, Object[] values) {
+    public SormCondition addInQuery(String field, Object[] values) {
         if (values == null || values.length == 0) {
             return this;
         }
@@ -103,12 +103,12 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addInQuery(String field, List<? extends Object> values) {
+    public SormCondition addInQuery(String field, List<? extends Object> values) {
         return addInQuery(field, values.toArray(new Object[values.size()]));
     }
 
     @Override
-    public Condition addNotInQuery(String field, Object[] values) {
+    public SormCondition addNotInQuery(String field, Object[] values) {
         if (values == null || values.length == 0) {
             return this;
         }
@@ -117,7 +117,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addNotInQuery(String field, List<? extends Object> values) {
+    public SormCondition addNotInQuery(String field, List<? extends Object> values) {
         return addNotInQuery(field, values.toArray(new Object[values.size()]));
     }
 
@@ -138,7 +138,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addBetweenQuery(String field, Object start, Object end) {
+    public SormCondition addBetweenQuery(String field, Object start, Object end) {
         query.whereBuilder.append("(t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " between ? and ? ) and ");
         query.parameterList.add(start);
         query.parameterList.add(end);
@@ -146,7 +146,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addLikeQuery(String field, Object value) {
+    public SormCondition addLikeQuery(String field, Object value) {
         if (value == null || value.toString().equals("")) {
             return this;
         }
@@ -166,13 +166,13 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addQuery(String query) {
+    public SormCondition addQuery(String query) {
         this.query.whereBuilder.append("(" + query + ") and ");
         return this;
     }
 
     @Override
-    public Condition addQuery(String field, Object value) {
+    public SormCondition addQuery(String field, Object value) {
         if (value == null || value.toString().equals("")) {
             return this;
         }
@@ -185,14 +185,14 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addQuery(String field, String operator, Object value) {
+    public SormCondition addQuery(String field, String operator, Object value) {
         query.whereBuilder.append("(t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " " + operator + " ?) and ");
         query.parameterList.add(value);
         return this;
     }
 
     @Override
-    public Condition addJSONObjectQuery(JSONObject queryCondition) {
+    public SormCondition addJSONObjectQuery(JSONObject queryCondition) {
         //主键查询
         {
             Property[] properties = query.entity.properties;
@@ -338,7 +338,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addUpdate(String field, Object value) {
+    public SormCondition addUpdate(String field, Object value) {
         if (query.updateParameterList == null) {
             query.updateParameterList = new ArrayList();
         }
@@ -348,21 +348,21 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addTogether(String together, String field) {
+    public SormCondition addTogether(String together, String field) {
         field = StringUtil.Camel2Underline(field);
         query.aggregateColumnBuilder.append(together + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, together + "(" + field + ")") + ",");
         return this;
     }
 
     @Override
-    public Condition addTogether(String together, String field, String alias) {
+    public SormCondition addTogether(String together, String field, String alias) {
         field = StringUtil.Camel2Underline(field);
         query.aggregateColumnBuilder.append(together + "(t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + ") as " + query.syntaxHandler.getSyntax(Syntax.Escape, alias) + ",");
         return this;
     }
 
     @Override
-    public Condition groupBy(String field) {
+    public SormCondition groupBy(String field) {
         query.groupByBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + ",");
         return this;
     }
@@ -385,25 +385,25 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition orderByAsc(String field) {
+    public SormCondition orderByAsc(String field) {
         query.orderByBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " asc,");
         return this;
     }
 
     @Override
-    public Condition orderByDesc(String field) {
+    public SormCondition orderByDesc(String field) {
         query.orderByBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, StringUtil.Camel2Underline(field)) + " desc,");
         return this;
     }
 
     @Override
-    public Condition limit(long offset, long limit) {
+    public SormCondition limit(long offset, long limit) {
         query.limit = "limit " + offset + "," + limit;
         return this;
     }
 
     @Override
-    public Condition page(int pageNum, int pageSize) {
+    public SormCondition page(int pageNum, int pageSize) {
         query.limit = "limit " + (pageNum - 1) * pageSize + "," + pageSize;
         page = new Page<>();
         page.setPageSize(pageSize);
@@ -412,21 +412,21 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
     }
 
     @Override
-    public Condition addColumn(String field) {
+    public SormCondition addColumn(String field) {
         field = StringUtil.Camel2Underline(field);
         query.addColumnBuilder.append("t." + query.syntaxHandler.getSyntax(Syntax.Escape, field) + " as " + query.syntaxHandler.getSyntax(Syntax.Escape, "t_" + field) + ",");
         return this;
     }
 
     @Override
-    public Condition addNotColumn(String field) {
+    public SormCondition addNotColumn(String field) {
         String t = query.sqlHelper.columnsNot(field, query.className, "t");
         StringBuilder notStr = new StringBuilder(t);
         query.addNotColumnBuilder = notStr;
         return this;
     }
 
-    protected Condition done() {
+    protected SormCondition done() {
         //更新，创建新的sql语句条件
         if (query.addColumnBuilder.length() > 0) {
             query.addColumnBuilder.deleteCharAt(query.addColumnBuilder.length() - 1);
@@ -814,7 +814,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
         return null;
     }
 
-    public AbstractCondition clone() {
+    public AbstractSormCondition clone() {
         try {
             /* 写入当前对象的二进制流 */
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -823,7 +823,7 @@ public class AbstractCondition<T> implements Condition<T>, Serializable {
             /* 读出二进制流产生的新对象 */
             ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
             ObjectInputStream ois = new ObjectInputStream(bis);
-            AbstractCondition abstractCondition = (AbstractCondition) ois.readObject();
+            AbstractSormCondition abstractCondition = (AbstractSormCondition) ois.readObject();
             abstractCondition.query.dataSource = query.dataSource;
             abstractCondition.query.abstractDAO = query.abstractDAO;
             abstractCondition.query.syntaxHandler = query.syntaxHandler;

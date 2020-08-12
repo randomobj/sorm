@@ -1,7 +1,7 @@
 package com.gitee.randomobject.dao;
 
 
-import com.gitee.randomobject.condition.Condition;
+import com.gitee.randomobject.condition.SormCondition;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * 数据库相关操作
  */
-public interface DAO {
+public interface SormDao {
 
     /**
      * <p>实体对象是否存在</p>
@@ -36,7 +36,7 @@ public interface DAO {
      * <p>复杂查询接口</p>
      * @param _class 类名,指定要查询的表
      */
-    <T> Condition<T> query(Class<T> _class);
+    <T> SormCondition<T> query(Class<T> _class);
 
     /**
      * <p>保存对象</p>

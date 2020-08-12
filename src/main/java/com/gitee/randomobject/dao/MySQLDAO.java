@@ -1,8 +1,8 @@
 package com.gitee.randomobject.dao;
 
 
-import com.gitee.randomobject.condition.Condition;
-import com.gitee.randomobject.condition.MySQLCondition;
+import com.gitee.randomobject.condition.SormCondition;
+import com.gitee.randomobject.condition.MySQLSormCondition;
 import com.gitee.randomobject.domain.Entity;
 import com.gitee.randomobject.domain.Property;
 import com.gitee.randomobject.helper.SQLHelper;
@@ -18,7 +18,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MySQLDAO extends AbstractDAO {
+public class MySQLDAO extends AbstractSormDao {
 
     public MySQLDAO(DataSource dataSource) {
         super(dataSource);
@@ -32,8 +32,8 @@ public class MySQLDAO extends AbstractDAO {
     }
 
     @Override
-    public <T> Condition<T> query(Class<T> _class) {
-        return new MySQLCondition(_class, dataSource, this, syntaxHandler, sqlHelper);
+    public <T> SormCondition<T> query(Class<T> _class) {
+        return new MySQLSormCondition(_class, dataSource, this, syntaxHandler, sqlHelper);
     }
 
     /**

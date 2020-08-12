@@ -10,58 +10,58 @@ import java.util.List;
 /**
  * 复杂查询条件接口
  */
-public interface Condition<T> {
+public interface SormCondition<T> {
 
     /**
      * 添加distinct语句
      */
-    Condition distinct();
+    SormCondition distinct();
 
     /**
      * 添加空查询
      * @param field 指明哪个字段为Null
      */
-    Condition addNullQuery(String field);
+    SormCondition addNullQuery(String field);
 
     /**
      * 添加非空查询
      * @param field 指明哪个字段不为Null
      */
-    Condition addNotNullQuery(String field);
+    SormCondition addNotNullQuery(String field);
 
     /**
      * 添加非空查询
      * @param field 指明哪个字段不为空字符串
      */
-    Condition addNotEmptyQuery(String field);
+    SormCondition addNotEmptyQuery(String field);
 
     /**
      * 添加范围查询语句
      * @param field  字段
      * @param values 指明在该范围内的值
      */
-    Condition addInQuery(String field, Object[] values);
+    SormCondition addInQuery(String field, Object[] values);
 
     /**
      * 添加范围查询语句
      * @param field  字段
      * @param values 指明在该范围内的值
      */
-    Condition addInQuery(String field, List<? extends Object> values);
+    SormCondition addInQuery(String field, List<? extends Object> values);
 
     /**
      * 添加范围查询语句
      * @param field  字段
      * @param values 指明在不该范围内的值
      */
-    Condition addNotInQuery(String field, Object[] values);
+    SormCondition addNotInQuery(String field, Object[] values);
 
     /**
      * 添加范围查询语句
      * @param field  字段
      * @param values 指明在不该范围内的值
      */
-    Condition addNotInQuery(String field, List<? extends Object> values);
+    SormCondition addNotInQuery(String field, List<? extends Object> values);
 
     /**
      * 添加between语句
@@ -70,7 +70,7 @@ public interface Condition<T> {
      * @param start 范围开始值
      * @param end   范围结束值
      */
-    Condition addBetweenQuery(String field, Object start, Object end);
+    SormCondition addBetweenQuery(String field, Object start, Object end);
 
     /**
      * 模糊查询
@@ -79,7 +79,7 @@ public interface Condition<T> {
      * @param field 指明需要模糊查询的字段
      * @param value 字段值
      */
-    Condition addLikeQuery(String field, Object value);
+    SormCondition addLikeQuery(String field, Object value);
 
     /**
      * 添加自定义查询语句
@@ -88,7 +88,7 @@ public interface Condition<T> {
      *
      * @param query 子查询条件(<b>主表</b>统一别名为t)
      */
-    Condition addQuery(String query);
+    SormCondition addQuery(String query);
 
     /**
      * 添加字段查询
@@ -96,7 +96,7 @@ public interface Condition<T> {
      * @param field 指明字段
      * @param value 字段值
      */
-    Condition addQuery(String field, Object value);
+    SormCondition addQuery(String field, Object value);
 
     /**
      * 添加字段查询
@@ -105,7 +105,7 @@ public interface Condition<T> {
      * @param operator 操作符,可为<b>></b>,<b>>=</b>,<b>=</b>,<b><</b><b><=</b>
      * @param value    字段值
      */
-    Condition addQuery(String field, String operator, Object value);
+    SormCondition addQuery(String field, String operator, Object value);
 
     /**
      * 添加自定义查询条件<br/>
@@ -142,24 +142,24 @@ public interface Condition<T> {
      * }<br/>
      * </code>
      */
-    Condition addJSONObjectQuery(JSONObject queryCondition);
+    SormCondition addJSONObjectQuery(JSONObject queryCondition);
 
     /**
-     * 添加更新字段,用于<b>{@link Condition#update()}</b>方法
+     * 添加更新字段,用于<b>{@link SormCondition#update()}</b>方法
      *
      * @param field 待更新的字段
      * @param value 待更新字段的值
      */
-    Condition addUpdate(String field, Object value);
+    SormCondition addUpdate(String field, Object value);
 
     /**
-     * <p>添加聚合字段,默认别名为<b>{@link Condition#getTogetherList()}</b></p>
+     * <p>添加聚合字段,默认别名为<b>{@link SormCondition#getTogetherList()}</b></p>
      * <p>用于<b>getAggerateList()</b>方法</p>
      *
      * @param together COUNT,SUM,MAX,MIN,AVG
      * @param field    字段名
      */
-    Condition addTogether(String together, String field);
+    SormCondition addTogether(String together, String field);
 
     /**
      * 添加聚合字段
@@ -168,14 +168,14 @@ public interface Condition<T> {
      * @param field    字段名
      * @param alias    聚合字段别名
      */
-    Condition addTogether(String together, String field, String alias);
+    SormCondition addTogether(String together, String field, String alias);
 
     /**
      * 添加分组查询
      *
      * @param field 分组字段
      */
-    Condition groupBy(String field);
+    SormCondition groupBy(String field);
 
     /**
      * 关联表
@@ -205,14 +205,14 @@ public interface Condition<T> {
      *
      * @param field 升序排列字段名
      */
-    Condition orderByAsc(String field);
+    SormCondition orderByAsc(String field);
 
     /**
      * 根据指定字段降序排列
      *
      * @param field 降序排列字段名
      */
-    Condition orderByDesc(String field);
+    SormCondition orderByDesc(String field);
 
     /**
      * 分页操作
@@ -220,7 +220,7 @@ public interface Condition<T> {
      * @param offset 偏移量
      * @param limit  返回个数
      */
-    Condition limit(long offset, long limit);
+    SormCondition limit(long offset, long limit);
 
     /**
      * 分页操作
@@ -228,20 +228,20 @@ public interface Condition<T> {
      * @param pageNum  第几页
      * @param pageSize 每页个数
      */
-    Condition page(int pageNum, int pageSize);
+    SormCondition page(int pageNum, int pageSize);
 
     /**
-     * 添加待查询字段,用于<b>{@link Condition#getPartList()}</b>
+     * 添加待查询字段,用于<b>{@link SormCondition#getPartList()}</b>
      *
      * @param field 要返回的字段
      */
-    Condition addColumn(String field);
+    SormCondition addColumn(String field);
 
     /**
-     * 排除不需要返回的字段，用于<b>{@link Condition#getPartList()}</b>
+     * 排除不需要返回的字段，用于<b>{@link SormCondition#getPartList()}</b>
      * @param field 不需要返回的字段
      */
-    Condition addNotColumn(String field);
+    SormCondition addNotColumn(String field);
 
     /**
      * 获取符合条件的总数目
@@ -250,7 +250,7 @@ public interface Condition<T> {
 
     /**
      * <p>更新符合条件的记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addUpdate(String, Object)}</b>方法</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#addUpdate(String, Object)}</b>方法</p>
      */
     long update();
 
@@ -285,55 +285,55 @@ public interface Condition<T> {
 
     /**
      * <p>返回聚合字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用{@link Condition#addTogether(String, String)}</p>
-     * <p>若调用了{@link Condition#addColumn(String)} 则会返回addColumn所指定的字段</p>
+     * <p><b>前置条件</b>:请先调用{@link SormCondition#addTogether(String, String)}</p>
+     * <p>若调用了{@link SormCondition#addColumn(String)} 则会返回addColumn所指定的字段</p>
      */
     JSONArray getTogetherList();
 
     /**
      * <p>返回指定的部分字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#addColumn(String)} </b></p>
      */
     List<T> getPartList();
 
     /**
      * <p>返回不包含指定字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#addColumn(String)} </b></p>
      */
     List<T> getNotPartList();
 
     /**
      * <p>返回符合条件的数据库分页记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#page(int, int)} </b>方法</p>
      */
     Page<T> getPageList();
 
     /**
      * <p>返回指定的部分字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addColumn(String)} </b></p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#addColumn(String)} </b></p>
      */
     Page<T> getPartPageList();
 
     /**
      * <p>返回不包含指定字段的数据库记录</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#addNotColumn(String)} </b></p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#addNotColumn(String)} </b></p>
      */
     Page<T> getNotPartPageList();
 
     /**
-     * <p>返回符合条件的数据库分页记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
-     * <p><b>前置条件</b>:请先调用<b>{@link Condition#page(int, int)} </b>方法</p>
+     * <p>返回符合条件的数据库分页记录,同时返回关联查询方法({@link SormCondition#joinTable(Class, String, String)})所关联的字段信息</p>
+     * <p><b>前置条件</b>:请先调用<b>{@link SormCondition#page(int, int)} </b>方法</p>
      */
     Page<T> getCompositPageList();
 
     /**
-     * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
+     * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link SormCondition#joinTable(Class, String, String)})所关联的字段信息</p>
      * <p><b>注意</b>:若未调用过joinTable方法,则该方法不会返回复杂对象字段信息</p>
      */
     List<T> getCompositList();
 
     /**
-     * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link Condition#joinTable(Class, String, String)})所关联的字段信息</p>
+     * <p>返回符合条件的数据库记录,同时返回关联查询方法({@link SormCondition#joinTable(Class, String, String)})所关联的字段信息</p>
      * <p><b>注意</b>:若未调用过joinTable方法,则该方法不会返回复杂对象字段信息</p>
      */
     JSONArray getCompositJSONArray();
@@ -341,5 +341,5 @@ public interface Condition<T> {
     /**
      * <p>克隆该Condition对象</p>
      */
-    Condition clone();
+    SormCondition clone();
 }

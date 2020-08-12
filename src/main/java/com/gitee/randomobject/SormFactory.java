@@ -1,7 +1,7 @@
 package com.gitee.randomobject;
 
-import com.gitee.randomobject.dao.AbstractDAO;
-import com.gitee.randomobject.dao.DAO;
+import com.gitee.randomobject.dao.AbstractSormDao;
+import com.gitee.randomobject.dao.SormDao;
 import com.gitee.randomobject.dao.MariaDBDAO;
 import com.gitee.randomobject.dao.MySQLDAO;
 import com.gitee.randomobject.util.ReflectionUtil;
@@ -69,14 +69,14 @@ public class SormFactory {
         return this;
     }
 
-    public DAO build() {
+    public SormDao build() {
         if (SormConfig.packageNameMap.isEmpty()) {
             throw new IllegalArgumentException("请设置要扫描的实体类包名!");
         }
         if (ValidateUtil.isNull(SormConfig.dataSource)) {
             throw new IllegalArgumentException("请设置数据库连接池属性!");
         }
-        AbstractDAO dao = null;
+        AbstractSormDao dao = null;
         try {
             Connection connection = SormConfig.dataSource.getConnection();
             String url = connection.getMetaData().getURL();
@@ -84,7 +84,7 @@ public class SormFactory {
             Set<String> keySet = driverMapping.keySet();
             for (String key : keySet) {
                 if (url.contains(key)) {
-                    dao = (AbstractDAO) driverMapping.get(key).getConstructor(DataSource.class).newInstance(SormConfig.dataSource);
+                    dao = (AbstractSormDao) driverMapping.get(key).getConstructor(DataSource.class).newInstance(SormConfig.dataSource);
                     break;
                 }
             }
@@ -95,6 +95,7 @@ public class SormFactory {
             ReflectionUtil.getEntityInfo();//获取指定路径下实体类信息
 
             dao.autoBuildDatabase(); //自动建表
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -103,6 +104,7 @@ public class SormFactory {
     }
 
     private enum SormFactoryBuilder {
+
         INSTANCE;
 
         private SormFactory sormFactory;
