@@ -57,8 +57,9 @@ public class ReflectionUtil {
                 } else {
                     return property.field.get(instance) == null;
                 }
-            } case "Long":{
-                return (property.field.get(instance)!=null&&property.field.getLong(instance)>0);
+            }
+            case "Long": {
+                return (property.field.get(instance) != null && property.field.getLong(instance) > 0);
             }
             default: {
                 throw new IllegalArgumentException("无法识别的主键类型:" + type);
@@ -144,7 +145,7 @@ public class ReflectionUtil {
         if (indexOf >= 0) {
             sqlBuilder.replace(indexOf, indexOf + placeHolder.length(), parameter);
         }
-        logger.info("[根据id更新实体类sql语句]sql:{}",sqlBuilder.toString());
+        logger.info("[根据id更新实体类sql语句]sql:{}", sqlBuilder.toString());
         return sqlBuilder.toString();
     }
 
@@ -179,6 +180,7 @@ public class ReflectionUtil {
                 parameterIndex++;
             }
         }
+        logger.info("[根据unique更新实体类sql语句]sql:{}", sql);
         return sql;
     }
 
@@ -261,10 +263,18 @@ public class ReflectionUtil {
                 if (o == null) {
                     ps.setObject(parameterIndex, null);
                 } else {
-//                    Timestamp timestamp = new Timestamp(((Date)o).getTime());
-//                    ps.setTimestamp(3,timestamp);
                     java.sql.Date sqlDate = new java.sql.Date(((Date) o).getTime());
                     ps.setDate(parameterIndex, sqlDate);
+                }
+                return "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
+            }
+            case "timestamp": {
+                Object o = field.get(instance);
+                if (o == null) {
+                    ps.setObject(parameterIndex, null);
+                } else {
+                    Timestamp timestamp = new Timestamp(((Date) o).getTime());
+                    ps.setTimestamp(parameterIndex, timestamp);
                 }
                 return "'" + (field.get(instance) == null ? "" : field.get(instance).toString()) + "'";
             }
@@ -285,14 +295,14 @@ public class ReflectionUtil {
             List<Class> classList = scanEntity(packageName); //加载指定路径下类的信息
             for (Class c : classList) {
                 Entity entity = new Entity();
-                if(c.getDeclaredAnnotation(TableName.class)!=null){
+                if (c.getDeclaredAnnotation(TableName.class) != null) {
                     entity.tableName = ((TableName) c.getDeclaredAnnotation(TableName.class)).value();
                     //判断此类所处的位置是不是在顶层包中，分辨是否存在若干嵌套的包中
-                }else if ((packageName.length() + c.getSimpleName().length() + 1) == c.getName().length()) {
-                    entity.tableName = SormConfig.packageNameMap.get(packageName)+StringUtil.Camel2Underline(c.getSimpleName());
+                } else if ((packageName.length() + c.getSimpleName().length() + 1) == c.getName().length()) {
+                    entity.tableName = SormConfig.packageNameMap.get(packageName) + StringUtil.Camel2Underline(c.getSimpleName());
                 } else {
                     String prefix = c.getName().substring(packageName.length() + 1, c.getName().lastIndexOf(".")).replace(".", "_");
-                    entity.tableName = SormConfig.packageNameMap.get(packageName)+prefix + "@" + StringUtil.Camel2Underline(c.getSimpleName());
+                    entity.tableName = SormConfig.packageNameMap.get(packageName) + prefix + "@" + StringUtil.Camel2Underline(c.getSimpleName());
                 }
                 entity._class = c;
                 entityMap.put(c.getName(), entity);
@@ -331,7 +341,7 @@ public class ReflectionUtil {
                         Property property = new Property();
                         if (fields[i].getAnnotation(ColumnName.class) != null) {
                             property.column = fields[i].getAnnotation(ColumnName.class).value();
-                        }else{
+                        } else {
                             property.column = StringUtil.Camel2Underline(fields[i].getName());
                         }
                         if (fields[i].getAnnotation(ColumnType.class) != null) {
@@ -339,8 +349,8 @@ public class ReflectionUtil {
                         }
                         property.name = fields[i].getName();
                         property.type = fields[i].getType().getSimpleName().toLowerCase();
-                        property.index = fields[i].getDeclaredAnnotation(Index.class)!=null;
-                        if(property.index){
+                        property.index = fields[i].getDeclaredAnnotation(Index.class) != null;
+                        if (property.index) {
                             indexPropertyList.add(property);
                         }
                         property.unique = fields[i].getDeclaredAnnotation(Unique.class) != null;

@@ -66,7 +66,7 @@ public abstract class AbstractSormDao implements SormDao {
     @Override
     public boolean exist(Object instance) {
         try {
-            //有id则一定存在
+            //有id则一定存在数据库记录
             if (ReflectionUtil.hasId(instance)) {
                 return true;
             }
@@ -167,11 +167,13 @@ public abstract class AbstractSormDao implements SormDao {
             Class _class = instance.getClass();
             PreparedStatement ps = null;
             long effect = 0;
-            //拿到实体类信息
-            Entity entity = ReflectionUtil.entityMap.get(_class.getName());
-            if (exist(instance)) { //如果返回true，那么一定是存在id
-                SormCondition sormCondition = getUniqueCondition(instance);
-                if (null != sormCondition) {
+
+            Entity entity = ReflectionUtil.entityMap.get(_class.getName());//拿到实体类信息
+            SormCondition sormCondition = getUniqueCondition(instance);//是否存在unique
+
+            if (ReflectionUtil.hasId(instance) && sormCondition != null) { //存在id且同时存在unique
+                //拿得到当前需要更新的实体类信息，从数据库中得到
+                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
                     List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
                     if (ids.size() > 0) {
                         entity.id.field.setLong(instance, ids.get(0));
@@ -182,15 +184,15 @@ public abstract class AbstractSormDao implements SormDao {
                 ps = connection.prepareStatement(updateById);
                 logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(ps, instance, updateById));
                 effect = ps.executeUpdate();
-            } else {
-                SormCondition sormCondition = getUniqueCondition(instance);
-                if (null != sormCondition) {
-                    if (sormCondition.count() > 0) {//存在唯一性约束，
-                        logger.debug("[当前保存的对象中，根据唯一性约束，库中已经存在于此相同的值]");
-                        return effect;
-                    }
-                }
-                //插入
+            } else if (sormCondition != null) {//仅存在unique
+
+                String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
+                ps = connection.prepareStatement(updateByUniqueKey);
+                logger.debug("[根据unique更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateByUniqueKey(ps, instance, updateByUniqueKey));
+                effect = ps.executeUpdate();
+
+            } else {//普通插入操作
+
                 String insertIgnore = sqlHelper.insertIgnore(_class, syntaxHandler.getSyntax(Syntax.InsertIgnore));
                 ps = connection.prepareStatement(insertIgnore, PreparedStatement.RETURN_GENERATED_KEYS);
                 logger.debug("[执行插入操作]执行SQL:{}", ReflectionUtil.setValueWithInsertIgnore(ps, instance, insertIgnore));
