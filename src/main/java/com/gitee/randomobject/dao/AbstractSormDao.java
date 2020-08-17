@@ -171,14 +171,17 @@ public abstract class AbstractSormDao implements SormDao {
             Entity entity = ReflectionUtil.entityMap.get(_class.getName());//拿到实体类信息
             SormCondition sormCondition = getUniqueCondition(instance);//是否存在unique
 
-            if (ReflectionUtil.hasId(instance) && sormCondition != null) { //存在id且同时存在unique
+            if (ReflectionUtil.hasId(instance)) { //存在id
                 //拿得到当前需要更新的实体类信息，从数据库中得到
-                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
-                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
-                    if (ids.size() > 0) {
-                        entity.id.field.setLong(instance, ids.get(0));
-                    }
-                }
+//                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
+//                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
+//                    if (ids.size() > 0) {
+//                        entity.id.field.setLong(instance, ids.get(0));
+//                    }
+//                }
+
+                //设置id值
+                entity.id.field.setLong(instance, entity.id.field.getLong(instance));
                 //根据id更新
                 String updateById = sqlHelper.updateById(_class);
                 ps = connection.prepareStatement(updateById);
