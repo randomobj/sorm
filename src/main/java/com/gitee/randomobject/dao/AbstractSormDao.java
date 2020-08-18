@@ -172,14 +172,6 @@ public abstract class AbstractSormDao implements SormDao {
             SormCondition sormCondition = getUniqueCondition(instance);//是否存在unique
 
             if (ReflectionUtil.hasId(instance)) { //存在id
-                //拿得到当前需要更新的实体类信息，从数据库中得到
-//                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
-//                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
-//                    if (ids.size() > 0) {
-//                        entity.id.field.setLong(instance, ids.get(0));
-//                    }
-//                }
-
                 //设置id值
                 entity.id.field.setLong(instance, entity.id.field.getLong(instance));
                 //根据id更新
@@ -187,29 +179,25 @@ public abstract class AbstractSormDao implements SormDao {
                 ps = connection.prepareStatement(updateById);
                 logger.debug("[根据id更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateById(ps, instance, updateById));
                 effect = ps.executeUpdate();
+
             } else if (sormCondition != null) {//仅存在unique
+                //查看是否存在当前传递的unique值
+                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
+                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
 
-                String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
-                ps = connection.prepareStatement(updateByUniqueKey);
-                logger.debug("[根据unique更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateByUniqueKey(ps, instance, updateByUniqueKey));
-                effect = ps.executeUpdate();
+                    if (ids.size() > 0) {//存在id，就是更新
+                        String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
+                        ps = connection.prepareStatement(updateByUniqueKey);
+                        logger.debug("[根据unique更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateByUniqueKey(ps, instance, updateByUniqueKey));
+                        effect = ps.executeUpdate();
 
+                    } else {//插入
+                        insert(connection, _class, instance, entity);
+                    }
+                }
             } else {//普通插入操作
 
-                String insertIgnore = sqlHelper.insertIgnore(_class, syntaxHandler.getSyntax(Syntax.InsertIgnore));
-                ps = connection.prepareStatement(insertIgnore, PreparedStatement.RETURN_GENERATED_KEYS);
-                logger.debug("[执行插入操作]执行SQL:{}", ReflectionUtil.setValueWithInsertIgnore(ps, instance, insertIgnore));
-                effect = ps.executeUpdate();
-                if (effect > 0) {
-                    //获取主键
-                    ResultSet rs = ps.getGeneratedKeys();
-                    if (rs.next()) {
-                        //默认获取的主键类型是long
-                        long id = rs.getLong(1);
-                        entity.id.field.setLong(instance, id);
-                    }
-                    rs.close();
-                }
+                insert(connection, _class, instance, entity);
             }
             if (ps != null) {
                 ps.close();
@@ -225,6 +213,40 @@ public abstract class AbstractSormDao implements SormDao {
             return -1;
         }
     }
+
+
+    private void insert(Connection connection, Class _class, Object instance, Entity entity) throws SQLException, IllegalAccessException {
+        PreparedStatement ps = null;
+        long effect = 0;
+        try {
+            String insertIgnore = sqlHelper.insertIgnore(_class, syntaxHandler.getSyntax(Syntax.InsertIgnore));
+            ps = connection.prepareStatement(insertIgnore, PreparedStatement.RETURN_GENERATED_KEYS);
+            logger.debug("[执行插入操作]执行SQL:{}", ReflectionUtil.setValueWithInsertIgnore(ps, instance, insertIgnore));
+            effect = ps.executeUpdate();
+            if (effect > 0) {
+                //获取主键
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    //默认获取的主键类型是long
+                    long id = rs.getLong(1);
+                    entity.id.field.setLong(instance, id);
+                }
+                rs.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+
+
+    }
+
 
     @Override
     public long save(List instanceList) throws SQLException {
