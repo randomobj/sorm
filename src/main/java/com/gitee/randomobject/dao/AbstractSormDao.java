@@ -101,12 +101,12 @@ public abstract class AbstractSormDao implements SormDao {
             int count = -1;
             if (value == null) {
                 String fetchNullSQL = sqlHelper.fetchNull(_class, property);
-                logger.debug("[根据属性{},value{},获取对象]执行sql:{}", property, value, fetchNullSQL);
+                logger.debug("[根据属性:{},value:{},获取对象]执行sql:{}", property, value, fetchNullSQL);
                 ps = connection.prepareStatement(fetchNullSQL);
                 count = (int) query(_class).addNullQuery(property).count();
             } else {
                 String fetchSQL = sqlHelper.fetch(_class, property);
-                logger.debug("[根据属性{},value{},{}获取对象]执行sql:{}", property, value, fetchSQL.replace("?", value.toString()));
+                logger.debug("[根据属性:{},value:{},获取对象]执行sql:{}", property, value, fetchSQL.replace("?", value.toString()));
                 ps = connection.prepareStatement(fetchSQL);
                 switch (value.getClass().getSimpleName().toLowerCase()) {
                     case "int": {
