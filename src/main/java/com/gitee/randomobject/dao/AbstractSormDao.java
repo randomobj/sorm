@@ -181,23 +181,23 @@ public abstract class AbstractSormDao implements SormDao {
                 effect = ps.executeUpdate();
 
             } else if (sormCondition != null) {//仅存在unique
-                //查看是否存在当前传递的unique值
-                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
-                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
 
-                    if (ids.size() > 0) {//存在id，就是更新
+                if (null != sormCondition) {//根据唯一性约束字段得到数据库中此实例的id值
+
+                    List<Long> ids = sormCondition.getValueList(Long.class, entity.id.name);
+                    if (ids.size() > 0) {//存在unique的字段的数据，就是更新
                         String updateByUniqueKey = sqlHelper.updateByUniqueKey(_class);
                         ps = connection.prepareStatement(updateByUniqueKey);
                         logger.debug("[根据unique更新]执行SQL:{}", ReflectionUtil.setValueWithUpdateByUniqueKey(ps, instance, updateByUniqueKey));
                         effect = ps.executeUpdate();
 
                     } else {//插入
-                        insert(connection, _class, instance, entity);
+                        effect = insert(connection, _class, instance, entity);
                     }
                 }
             } else {//普通插入操作
 
-                insert(connection, _class, instance, entity);
+                effect = insert(connection, _class, instance, entity);
             }
             if (ps != null) {
                 ps.close();
@@ -215,7 +215,7 @@ public abstract class AbstractSormDao implements SormDao {
     }
 
 
-    private void insert(Connection connection, Class _class, Object instance, Entity entity) throws SQLException, IllegalAccessException {
+    private long insert(Connection connection, Class _class, Object instance, Entity entity) {
         PreparedStatement ps = null;
         long effect = 0;
         try {
@@ -233,18 +233,18 @@ public abstract class AbstractSormDao implements SormDao {
                 }
                 rs.close();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (ps != null)
-                ps.close();
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-
-
+        return effect;
     }
 
 
