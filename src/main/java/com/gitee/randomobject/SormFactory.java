@@ -103,6 +103,9 @@ public class SormFactory {
         return dao;
     }
 
+    /**
+     * jvm保证enum类型的构造器只会被加载一次
+     */
     private enum SormFactoryBuilder {
 
         INSTANCE;

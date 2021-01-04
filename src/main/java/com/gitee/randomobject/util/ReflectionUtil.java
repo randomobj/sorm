@@ -292,7 +292,9 @@ public class ReflectionUtil {
 
         Set<String> keySet = SormConfig.packageNameMap.keySet();
         for (String packageName : keySet) {
-            List<Class> classList = scanEntity(packageName); //加载指定路径下类的信息
+            // TODO: 2020-11-28 加载指定路径下类的信息
+            List<Class> classList = scanEntity(packageName);
+            // TODO: 获得类信息
             for (Class c : classList) {
                 Entity entity = new Entity();
                 if (c.getDeclaredAnnotation(TableName.class) != null) {
@@ -307,6 +309,7 @@ public class ReflectionUtil {
                 entity._class = c;
                 entityMap.put(c.getName(), entity);
             }
+            // TODO：获得字段信息
             for (Class c : classList) {
                 Entity entity = entityMap.get(c.getName());
                 entity.className = c.getSimpleName();
